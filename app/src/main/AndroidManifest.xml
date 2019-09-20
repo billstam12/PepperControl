@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.peppercontrol20">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <uses-feature android:name="com.softbank.hardware.pepper" />
+
+    <application
+        android:allowBackup="true"
+        android:configChanges="orientation|keyboardHidden"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".AppActivities.PhotoPresentation"></activity>
+        <activity android:name=".AppActivities.StartPepper" />
+        <activity android:name=".MediaPlayers.VideoPlayers" />
+        <activity android:name=".MediaPlayers.SingleMedia" />
+        <activity android:name=".AppActivities.PepperActivity" />
+        <activity
+            android:name=".AppActivities.ListenSay"
+            android:theme="@style/Theme.Transparent"></activity>
+        <activity android:name=".IntroChoise">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".AppActivities.SetupRobot" />
+        <activity
+            android:name=".Controllers.RobotController"
+            android:screenOrientation="portrait" />
+
+        <service android:name=".Controllers.ChatController" />
+
+        <activity android:name=".AppActivities.MainActivity" />
+    </application>
+
+</manifest>

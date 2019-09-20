@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Pepper Control</string>
+    <string name="none_paired">No devices have been paired</string>
+    <string name="none_found">No devices found</string>
+    <string-array name="activities">
+        <item></item>
+        <item>Disco</item>
+        <item>Guitar</item>
+        <item>Video</item>
+        <item>Photo</item>
+    </string-array>
+
+</resources>

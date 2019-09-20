@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="415dp"
+    android:layout_height="fill_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:fillViewport="true"
+    >
+
+    <LinearLayout
+    android:layout_width="415dp"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:padding="5dp"
+    android:id="@+id/popup_element"
+    android:orientation="vertical"
+   >
+
+    <Button
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="end"
+        android:gravity="center"
+        android:text="X"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:id="@+id/x-button"
+        android:background="@drawable/circlebackground"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="105dp"
+            android:layout_height="105dp"
+            android:src="@drawable/pepper_photo"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="10dp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:text="Select Below what you want me to Talk to you about!"/>
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="25dp"
+        android:id="@id/editLayout">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:textColor="@color/white"
+            android:text="I Listen to:"/>
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Write a Phrase for me to Listen"
+            android:textColorHint="@color/white"
+
+            android:background="@drawable/editbuttonshape"
+            android:textColor="@color/white"
+            android:layout_gravity="left"
+
+            android:id="@+id/editTextListen"/>
+
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Listen"
+            android:textColor="@color/white"
+            android:layout_gravity="right"
+            android:background="@drawable/buttonshape"
+            android:id="@+id/listenButton"/>
+        <com.example.peppercontrol20.ConversationControl.MyListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+
+            android:textColorHint="@color/white"
+            android:id="@+id/listViewListen"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="25dp"
+        android:id="@id/editLayout2">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:textColor="@color/white"
+            android:text="I Respond with:"/>
+        <LinearLayout
+            android:layout_width="300dp"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/editTextSay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:background="@drawable/editbuttonshape"
+                android:gravity="left"
+                android:hint="Write a Phrase for me to Say"
+                android:textColor="@color/white"
+
+                android:textColorHint="@color/white" />
+
+
+        </LinearLayout>
+        <Button
+            android:id="@+id/saySound"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginRight="20dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="20dp"
+            android:layout_gravity="right"
+            android:background="@drawable/sound" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Say"
+            android:textColor="@color/white"
+            android:layout_gravity="right"
+            android:background="@drawable/buttonshape"
+            android:id="@+id/sayButton"/>
+        <com.example.peppercontrol20.ConversationControl.MyListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:id="@+id/listViewSay"
+            />
+    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="25dp"
+            android:id="@id/editLayout2">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="5dp"
+                android:textColor="@color/white"
+                android:text="After, I will perform this activity:"/>
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColorHint="@color/white"
+                android:textColor="@color/white"
+                android:layout_gravity="end"
+                android:gravity="top"
+                android:id="@+id/spinnerActivity"/>
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="25dp"
+            android:id="@+id/videoLayout"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="5dp"
+                android:textColor="@color/white"
+                android:text="Add videos for this conversation"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Video"
+                android:textColor="@color/white"
+                android:layout_gravity="right"
+                android:background="@drawable/buttonshape"
+                android:id="@+id/addVideoButton"/>
+
+            <com.example.peppercontrol20.ConversationControl.MyListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:id="@+id/listViewVideo"
+
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="25dp"
+            android:id="@+id/photoLayout"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="5dp"
+                android:textColor="@color/white"
+                android:text="Add Photos for this conversation"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Photo"
+                android:textColor="@color/white"
+                android:layout_gravity="right"
+                android:background="@drawable/buttonshape"
+                android:id="@+id/addPhotoButton"/>
+
+            <com.example.peppercontrol20.ConversationControl.MyListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:id="@+id/listViewPhoto"
+
+                />
+
+            <ImageView
+                android:layout_width="200dp"
+                android:layout_height="150dp"
+                android:id="@+id/testImage"/>
+        </LinearLayout>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SAVE"
+            android:layout_marginTop="15dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/buttonshape"
+            android:id="@+id/save_popup"
+            android:textColor="@color/white"/>
+
+
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>
