@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.MediaController;
 import android.widget.PopupWindow;
@@ -94,11 +96,11 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     public static final String DEVICE_OBJECT = "Robot";
     private BluetoothDevice connectingDevice;
     private ListView listView;
-
+    private ImageView wallpaper;
     private static final int REQUEST_ENABLE_BLUETOOTH = 1;
     private ChatController chatController;
     public TextView txtView ;
-
+    int event_id;
     SQLiteDatabaseHandler db; //Database
     private Handler handler = new Handler(new Handler.Callback() {
 
@@ -166,7 +168,13 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
 
 
 
+        Intent startIntent = getIntent();
         db = new SQLiteDatabaseHandler(this);
+        wallpaper = findViewById(R.id.eventWallpaper);
+        event_id = startIntent.getIntExtra("Event", db.getEventsMaxID());
+        if(db.getEventImageByID(event_id)!=null) {
+            wallpaper.setImageURI(Uri.parse(db.getEventImageByID(event_id)));
+        }
         txtView = findViewById(R.id.textView_strength_right);
         status = findViewById(R.id.status);
         mediaPlayerGuitar = MediaPlayer.create(this, R.raw.wholelottalove);
@@ -220,7 +228,7 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         sayIntro.run();
 
         //Init Conversations
-        conversations = (ArrayList<Conversation>) db.getAllConversations();
+        conversations = (ArrayList<Conversation>) db.getAllConversations(event_id);
 
 
         String chatBot = "topic: ~chatbot()\n";
@@ -296,7 +304,7 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
 
     @Override
     public  void onDestroy(){
-        //QiSDK.unregister(this, this);
+        QiSDK.unregister(this, this);
         super.onDestroy();
 
     }
@@ -414,8 +422,7 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
 
         // Always call the superclass so it can save the view hierarchy state
         super.onSaveInstanceState(outState);
-        outState.putString("CONNECT", status.getText().toString());
-        outState.putSerializable("LIST", chatMessages);
+
     }
 
     @Override
@@ -433,14 +440,7 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     public void onStart() {
 
         super.onStart();
-        /*
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableIntent, REQUEST_ENABLE_BLUETOOTH);
-        } else {
-            chatController =  ChatController.getInstance(handler);
-        }
-        */
+
 
     }
 
@@ -448,12 +448,7 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     public void onResume() {
         super.onResume();
 
-        if (chatController != null) {
-            if (chatController.getState() == ChatController.STATE_NONE) {
-                chatController = ChatController.getInstance(handler);
-                chatController.start();
-            }
-        }
+
     }
 
 

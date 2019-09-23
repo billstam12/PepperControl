@@ -19,14 +19,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".AppActivities.PhotoPresentation"></activity>
+        <activity android:name=".ConversationControl.AdminPanel"></activity>
+        <activity android:name=".AppActivities.PhotoPresentation" />
         <activity android:name=".AppActivities.StartPepper" />
         <activity android:name=".MediaPlayers.VideoPlayers" />
         <activity android:name=".MediaPlayers.SingleMedia" />
         <activity android:name=".AppActivities.PepperActivity" />
         <activity
             android:name=".AppActivities.ListenSay"
-            android:theme="@style/Theme.Transparent"></activity>
+            android:theme="@style/Theme.Transparent" />
         <activity android:name=".IntroChoise">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

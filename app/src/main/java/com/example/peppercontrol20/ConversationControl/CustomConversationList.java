@@ -27,6 +27,7 @@ import com.aldebaran.qi.sdk.object.conversation.Say;
 import com.example.peppercontrol20.Adapters.ListenAdapter;
 import com.example.peppercontrol20.Adapters.PhotoAdapter;
 import com.example.peppercontrol20.Adapters.SayAdapter;
+import com.example.peppercontrol20.Adapters.VideoAdapter;
 import com.example.peppercontrol20.AppActivities.PhotoObservable;
 import com.example.peppercontrol20.AppActivities.editPhoto;
 import com.example.peppercontrol20.R;
@@ -38,7 +39,8 @@ import java.util.Observer;
 public class CustomConversationList extends BaseAdapter implements Observer {
     private Activity context;
     public ArrayList<Conversation> conversations;
-    private Dialog pwindo, pwindo2, pwindo_edit_text;
+    public int event_id;
+    private Dialog pwindo, pwindo2, pwindo_edit_text, pwindo_edit_video;
 
     SQLiteDatabaseHandler db;
 
@@ -70,8 +72,8 @@ public class CustomConversationList extends BaseAdapter implements Observer {
 
     ArrayList<VideoConv> videos;
     ArrayList<PhotoConv> photos;
-    ArrayList<String> videoNames;
-    ArrayAdapter<String> adptVideo;
+
+    VideoAdapter adptVideo;
     ArrayAdapter<String> adapter;
 
     PhotoAdapter adptPhoto;
@@ -81,9 +83,11 @@ public class CustomConversationList extends BaseAdapter implements Observer {
     public int listenIDPad = 1;
     public int sayIDPad = 1;
 
-    public CustomConversationList(Activity context, ArrayList<Conversation> conversations, SQLiteDatabaseHandler db) {
+
+    public CustomConversationList(Activity context, ArrayList<Conversation> conversations, SQLiteDatabaseHandler db, int event_id) {
         this.context = context;
         this.conversations = conversations;
+        this.event_id = event_id;
         this.db = db;
         PhotoObservable.getInstance().addObserver(this);
 
@@ -172,7 +176,7 @@ public class CustomConversationList extends BaseAdapter implements Observer {
                 db.deleteConversation(conversations.get(positionPopup));
 
                 //      countries.remove(index.intValue());
-                conversations = (ArrayList) db.getAllConversations();
+                conversations = (ArrayList) db.getAllConversations(event_id);
                 Log.d("Conversations size", "" + conversations.size());
                 notifyDataSetChanged();
             }
@@ -219,7 +223,7 @@ public class CustomConversationList extends BaseAdapter implements Observer {
 
         ArrayList<Integer> listenIdsForDel = new ArrayList<>();
         ArrayList<Integer> sayIdsForDel = new ArrayList<>();
-
+        ArrayList<Integer> videoIdsForDel = new ArrayList<>();
         final ArrayList<ListenConv> listens = (db.getListens(conversations.get(positionPopup).getId()));
         final ArrayList<SayConv> says = (db.getSays(conversations.get(positionPopup).getId())) ;
         videos = (db.getVideos(conversations.get(positionPopup).getId()));
@@ -227,7 +231,6 @@ public class CustomConversationList extends BaseAdapter implements Observer {
         Log.d("Conversation:" + Integer.toString(positionPopup), Integer.toString(videos.size()));
         final ArrayList<String> listensText = new ArrayList<>();
         final ArrayList<String> saysText = new ArrayList<>();
-        videoNames = new ArrayList<>();
         tmpListens = new ArrayList<>();
         tmpSays = new ArrayList<>();
 
@@ -247,7 +250,6 @@ public class CustomConversationList extends BaseAdapter implements Observer {
         for(int i = 0; i < videos.size(); i++){
             Log.d("Video", videos.get(i).getName());
 
-            videoNames.add(videos.get(i).getName());
         }
         for(int i = 0; i < photos.size(); i++){
             Log.d("Photo", photos.get(i).getUri().toString());
@@ -263,7 +265,7 @@ public class CustomConversationList extends BaseAdapter implements Observer {
         final ArrayAdapter<String> adptListen = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, listensText);
         final ArrayAdapter<String> adptSay = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, saysText);
         */
-        adptVideo = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, videoNames);
+        adptVideo = new VideoAdapter(context, android.R.layout.simple_list_item_1, videos);
 
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, context.getResources().getStringArray(R.array.activities));
 
@@ -477,6 +479,70 @@ public class CustomConversationList extends BaseAdapter implements Observer {
                 videos = addVideoPopUp(videos, positionPopup);
             }
         });
+        videoView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+                                           int pos, long id) {
+
+                Log.v("long clicked","pos: " + pos);
+                pwindo_edit_video = new Dialog(pwindo.getContext());
+                pwindo_edit_video.setContentView(R.layout.edit_video_new);
+                EditText videoName = pwindo_edit_video.findViewById(R.id.video_name);
+                EditText videoURL = pwindo_edit_video.findViewById(R.id.video_url);
+                EditText videoCat = pwindo_edit_video.findViewById(R.id.video_cat);
+                EditText videoDesc = pwindo_edit_video.findViewById(R.id.video_desc);
+
+                VideoConv video = (VideoConv)arg0.getAdapter().getItem(pos);
+                videoName.setText(video.name);
+                videoURL.setText(video.url);
+                videoCat.setText(video.category);
+                videoDesc.setText(video.description);
+
+                pwindo_edit_video.show();
+                Integer videoEditID = video.id;
+
+                // Set clicks
+                Button deleteEditVideo = pwindo_edit_video.findViewById(R.id.delete_video_popup);
+                Button saveEditVideo = pwindo_edit_video.findViewById(R.id.save_video_popup);
+                Button closeEditButton = pwindo_edit_video.findViewById(R.id.x_button_video);
+                deleteEditVideo.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //db.deleteListen(listens);
+                        // TODO: add yes or no
+                        if(videoEditID <= db.getVideosMaxID()){
+                            videoIdsForDel.add(videoEditID);
+                        }
+                        for(int i = 0; i < videos.size(); i++){
+                            if(videos.get(i).id == video.id){
+                                videos.remove(i);
+                            }
+                        }
+                        adptVideo.setNotifyOnChange(true);
+                        videoView.setAdapter(adptVideo);
+                        pwindo_edit_video.dismiss();
+                    }
+                });
+
+
+                saveEditVideo.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        videos.set(pos, new VideoConv(videos.get(pos).id, videos.get(pos).conv_id, videoURL.getText().toString().replace("dl=0", "raw=1"), videoCat.getText().toString(), videoDesc.getText().toString(), videoName.getText().toString()));
+                        adptVideo.setNotifyOnChange(true);
+                        videoView.setAdapter(adptVideo);
+                        pwindo_edit_video.dismiss();
+                    }
+                });
+                closeEditButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        pwindo_edit_video.dismiss();
+                    }
+                });
+                return true;
+            }
+        });
         //addPhoto.setVisibility(View.INVISIBLE);
         addPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -571,7 +637,6 @@ public class CustomConversationList extends BaseAdapter implements Observer {
                 if (false == videoNAME.getText().toString().equals("") && false == videoURL.getText().toString().equals("")) {
                     Log.d("Video", videoNAME.getText().toString());
                     videos.add(new VideoConv(maxVideoId + 1, conversations.get(positionPopup).getId(), videoURL.getText().toString(), videoCAT.getText().toString(), videoDESC.getText().toString(), videoNAME.getText().toString()));
-                    videoNames.add(videoNAME.getText().toString());
                     adptVideo.setNotifyOnChange(true);
                     videoView.setAdapter(adptVideo);
                 }

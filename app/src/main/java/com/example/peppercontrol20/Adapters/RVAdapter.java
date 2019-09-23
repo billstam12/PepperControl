@@ -74,6 +74,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.MyViewHolder> {
 
         holder.name.setText(mData.get(position).getName());
         holder.description.setText(mData.get(position).getDescription());
+        holder.category.setText(mData.get(position).getCategory());
         Log.d("Description", mData.get(position).getDescription());
         Log.d("Category", mData.get(position).getCategory());
         String uri= (mData.get(position).getUrl());

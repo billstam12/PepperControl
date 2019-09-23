@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="415dp"
+    android:layout_height="fill_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:fillViewport="true"
+    >
+
+    <LinearLayout
+        android:layout_width="415dp"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimaryDark"
+        android:padding="5dp"
+        android:id="@+id/popup_video"
+        android:orientation="vertical"
+        >
+
+        <Button
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="end"
+            android:gravity="center"
+            android:text="X"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:id="@+id/x-button-video"
+            android:background="@drawable/circlebackground"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="10dp"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:text="Give below the details of the video"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="10dp"
+                android:gravity="left"
+                android:textColor="@color/white"
+                android:text="Enter URL"/>
+
+            <EditText
+                android:layout_width="250dp"
+                android:layout_height="45dp"
+                android:layout_gravity="left"
+                android:textColor="@color/white"
+                android:id="@+id/video_url"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="10dp"
+                android:gravity="left"
+
+                android:textColor="@color/white"
+                android:text="Enter Name"/>
+            <EditText
+                android:layout_width="250dp"
+                android:layout_height="45dp"
+                android:textColor="@color/white"
+                android:layout_gravity="left"
+                android:id="@+id/video_name"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="10dp"
+                android:gravity="left"
+                android:textColor="@color/white"
+                android:text="Enter Category"/>
+
+            <EditText
+                android:layout_width="250dp"
+                android:layout_height="45dp"
+                android:layout_gravity="left"
+
+                android:textColor="@color/white"
+
+                android:id="@+id/video_cat"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="10dp"
+                android:gravity="left"
+                android:textColor="@color/white"
+                android:text="Enter Description"/>
+
+            <EditText
+                android:layout_width="250dp"
+                android:layout_height="45dp"
+                android:layout_gravity="left"
+                android:textColor="@color/white"
+                android:id="@+id/video_desc"/>
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SAVE"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/buttonshape"
+            android:id="@+id/save_video_popup"
+            android:textColor="@color/white"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DELETE"
+            android:layout_marginTop="15dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/buttonshape"
+            android:id="@+id/delete_video_popup"
+            android:textColor="@color/white"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>

@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.peppercontrol20.Controllers.ChatController;
+import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 import com.example.peppercontrol20.R;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class PepperActivity extends AppCompatActivity {
     private Button btnSetup;
     private Button btnStart;
     private ListView listView;
+    private TextView eventName;
     private Dialog dialog;
     private TextInputLayout inputLayout;
     private ArrayAdapter<String> chatAdapter;
@@ -58,18 +60,29 @@ public class PepperActivity extends AppCompatActivity {
     // Make sure to declare as ArrayList so it's Serializable
     static final String STATE_USER = "user";
     private String mUser;
-
+    int event_id;
+    SQLiteDatabaseHandler db;
+    /*
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
     }
 
+    */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_pepper);
+
+        Intent startIntent = getIntent();
+        db = new SQLiteDatabaseHandler(this);
+
+        event_id = startIntent.getIntExtra("Event", db.getEventsMaxID());
+        String name = db.getEventNameByID(event_id);
+        eventName = findViewById(R.id.event_name);
+        eventName.setText(name);
         findViewsByIds();
+        /*
         if (savedInstanceState != null) {
             // Restore value of members from saved state
             status.setText(savedInstanceState.getString("CONNECT"));
@@ -85,6 +98,7 @@ public class PepperActivity extends AppCompatActivity {
             //set chat adapter
             listView.setAdapter(chatAdapter);
         }
+
         // REQUIRE BLUETOOTH
 
         //check device support bluetooth or not
@@ -108,6 +122,7 @@ public class PepperActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(PepperActivity.this, SetupRobot.class);
+                intent.putExtra("Event", event_id);
                 startActivity(intent);
             }
         });
@@ -115,6 +130,7 @@ public class PepperActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(PepperActivity.this, StartPepper.class);
+                intent.putExtra("Event", event_id);
                 //intent.putExtra("chatController", chatController);
                 startActivity(intent);
             }

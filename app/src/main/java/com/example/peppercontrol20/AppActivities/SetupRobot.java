@@ -33,6 +33,7 @@ import com.aldebaran.qi.sdk.object.conversation.Say;
 import com.example.peppercontrol20.Adapters.ListenAdapter;
 import com.example.peppercontrol20.Adapters.PhotoAdapter;
 import com.example.peppercontrol20.Adapters.SayAdapter;
+import com.example.peppercontrol20.Adapters.VideoAdapter;
 import com.example.peppercontrol20.ConversationControl.Conversation;
 import com.example.peppercontrol20.ConversationControl.CustomConversationList;
 import com.example.peppercontrol20.ConversationControl.ListenConv;
@@ -40,6 +41,7 @@ import com.example.peppercontrol20.ConversationControl.PhotoConv;
 import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 import com.example.peppercontrol20.ConversationControl.SayConv;
 import com.example.peppercontrol20.ConversationControl.VideoConv;
+import com.example.peppercontrol20.Models.Video;
 import com.example.peppercontrol20.R;
 
 import java.net.URI;
@@ -73,10 +75,10 @@ public class SetupRobot extends AppCompatActivity  {
     EditText videoDESC;
     EditText videoCAT;
     EditText videoNAME;
-
+    int event_id;
     int conversation_id;
     //PopupWindow pwindo;
-    Dialog pwindo, pwindo2, pwindo_edit_text;
+    Dialog pwindo, pwindo2, pwindo_edit_text, pwindo_edit_video;
     Activity activity;
     ListView listView;
     ListView listenView;
@@ -90,21 +92,22 @@ public class SetupRobot extends AppCompatActivity  {
     ArrayList<VideoConv> videos;
     ArrayList<PhotoConv> photos;
     CustomConversationList customConversationList;
-    ArrayList<String> videoNames;
-    ArrayAdapter<String> adptVideo;
+    VideoAdapter adptVideo;
     ImageView imageView;
     PhotoAdapter adptPhoto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        // Get event
+        Intent startIntent = getIntent();
         setContentView(R.layout.activity_setup_robot);
         activity=this;
 
         pwindo = new Dialog(this);
 
         db = new SQLiteDatabaseHandler(this);
+        event_id = startIntent.getIntExtra("Event", db.getEventsMaxID());
 
         listView = (ListView) findViewById(android.R.id.list);
 
@@ -138,18 +141,18 @@ public class SetupRobot extends AppCompatActivity  {
 
 
 
-        conversations = (ArrayList<Conversation>) db.getAllConversations();
+        conversations = (ArrayList<Conversation>) db.getAllConversations(event_id);
         conversation_id = db.getConvoMaxID();
         if(conversation_id != 0 ){
             conversation_id +=1;
         }
         for (Conversation conversation : conversations) {
-            //String log = "Id: " + conversation.getId() + " ,Listen: " + conversation.getConversationListen() + " ,Say: " + conversation.getConversationSay();
+            String log = "Id: " + conversation.getId() + " ,Listen: " + conversation.getConversationListen() + " ,Say: " + conversation.getConversationSay();
             // Writing Conversations to log
             //Log.d("Name: ", log);
         }
 
-        CustomConversationList customConversationList = new CustomConversationList(this, conversations, db);
+        CustomConversationList customConversationList = new CustomConversationList(this, conversations, db, event_id);
         listView.setAdapter(customConversationList);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -187,14 +190,14 @@ public class SetupRobot extends AppCompatActivity  {
         tmpSays = new ArrayList<SayConv>();
         addVideo = pwindo.findViewById(R.id.addVideoButton);
         addPhoto = pwindo.findViewById(R.id.addPhotoButton);
-        videoNames = new ArrayList<String>();
         videos  = new ArrayList<>();
-        adptVideo = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, videoNames);
+        adptVideo = new VideoAdapter(this,
+                android.R.layout.simple_list_item_1, videos);
         videoView = pwindo.findViewById(R.id.listViewVideo);
         adptPhoto = new PhotoAdapter(this, android.R.layout.simple_list_item_1, photos);
 
         photoView.setAdapter(adptPhoto);
+        videoView.setAdapter(adptVideo);
         //final ArrayList<String> listensText = new ArrayList<String>();
         //final ArrayList<String> saysText = new ArrayList<String>();
 
@@ -436,7 +439,66 @@ public class SetupRobot extends AppCompatActivity  {
 
             }
         });
+        /* Add longpress to Edit */
+        videoView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+                                           int pos, long id) {
+                // Open popup
+                Log.v("long clicked","pos: " + pos);
+                pwindo_edit_video = new Dialog(pwindo.getContext());
+                pwindo_edit_video.setContentView(R.layout.edit_video_new);
+                EditText videoName = pwindo_edit_video.findViewById(R.id.video_name);
+                EditText videoURL = pwindo_edit_video.findViewById(R.id.video_url);
+                EditText videoCat = pwindo_edit_video.findViewById(R.id.video_cat);
+                EditText videoDesc = pwindo_edit_video.findViewById(R.id.video_desc);
 
+                VideoConv video = (VideoConv)arg0.getAdapter().getItem(pos);
+                videoName.setText(video.name);
+                videoURL.setText(video.url);
+                videoCat.setText(video.category);
+                videoDesc.setText(video.description);
+
+                pwindo_edit_video.show();
+
+                // Set clicks
+                Button deleteEditVideo = pwindo_edit_video.findViewById(R.id.delete_video_popup);
+                Button saveEditVideo = pwindo_edit_video.findViewById(R.id.save_video_popup);
+                Button closeEditButton = pwindo_edit_video.findViewById(R.id.x_button_video);
+                deleteEditVideo.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //db.deleteListen(listens);
+                        // TODO: add yes or no
+                        videos.remove(pos);
+                        //listensText.remove(pos);
+                        adptVideo.setNotifyOnChange(true);
+                        videoView.setAdapter(adptVideo);
+
+                        pwindo_edit_video.dismiss();
+                    }
+                });
+
+
+                saveEditVideo.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        videos.set(pos, new VideoConv(videos.get(pos).id, videos.get(pos).conv_id, videoURL.getText().toString().replace("dl=0", "raw=1"), videoCat.getText().toString(), videoDesc.getText().toString(), videoName.getText().toString()));
+                        //listensText.set(pos, listenEditText.getText().toString());
+                        adptVideo.setNotifyOnChange(true);
+                        videoView.setAdapter(adptVideo);
+                        pwindo_edit_video.dismiss();
+                    }
+                });
+                closeEditButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        pwindo_edit_video.dismiss();
+                    }
+                });
+                return true;
+            }
+        });
         addVideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -477,18 +539,18 @@ public class SetupRobot extends AppCompatActivity  {
                 }
 
 
-                Conversation conversation = new Conversation(conversation_id, listens, says, videos, photos, conversationActivity);
+                Conversation conversation = new Conversation(conversation_id, event_id, listens, says, videos, photos, conversationActivity);
                 if(listens.size()!=0 && says.size()!=0) {
                     db.addConversation(conversation);
                     conversation_id++;
                 }
                 if(customConversationList==null)
                 {
-                    customConversationList = new CustomConversationList(activity, conversations, db);
+                    customConversationList = new CustomConversationList(activity, conversations, db, event_id);
                     listView.setAdapter(customConversationList);
                 }
 
-                customConversationList.conversations = (ArrayList) db.getAllConversations();
+                customConversationList.conversations = (ArrayList) db.getAllConversations(event_id);
                 ((BaseAdapter)listView.getAdapter()).notifyDataSetChanged();
                 for (Conversation conversation1 : conversations) {
                     String log = "Id: " + conversation1.getId() + " ,Listen: " + conversation1.getConversationListen() + " ,Say: " + conversation1.getConversationSay();
@@ -570,10 +632,10 @@ public class SetupRobot extends AppCompatActivity  {
                 }
                 */
                 Log.d("Convo_id", Integer.toString(conversation_id));
+                Log.d("Video URL", videoURL.getText().toString().replace("dl=0", "raw=1"));
                 if(false == videoNAME.getText().toString().equals("") && false == videoURL.getText().toString().equals("")) {
                     Log.d("Video", videoNAME.getText().toString()) ;
                     videos.add( new VideoConv(maxVideoId + 1, conversation_id, videoURL.getText().toString().replace("dl=0", "raw=1"), videoCAT.getText().toString(), videoDESC.getText().toString(), videoNAME.getText().toString()));
-                    videoNames.add(videoNAME.getText().toString());
                     adptVideo.setNotifyOnChange(true);
                     videoView.setAdapter(adptVideo);
                 }

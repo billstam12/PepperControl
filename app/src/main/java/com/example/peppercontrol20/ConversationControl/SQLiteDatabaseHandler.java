@@ -34,16 +34,24 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
     private static final String TABLE_SAY = "Say";
     private static final String TABLE_VIDEO = "Video";
     private static final String TABLE_PHOTO = "Photo";
+    private static final String TABLE_EVENT = "Event";
+
+    // Event Table Columns names
+    private static final String EVENT_NAME = "Event_Name";
+    private static final String EVENT_PHOTO = "Event_Photo";
+    private static final String EVENT_ICON = "Event_Icon";
+
 
     // Conversation Table Columns names
     private static final String KEY_ID = "id";
+    private static final String EVENT_ID = "Event_ID";
+    private static final String ACTIVITY = "Activity";
 
 
     // Conversation Table Listen names
     private static final String LISTEN_ID = "Listen_ID";
     private static final String CONV_ID = "Conversation_ID";
     private static final String LISTEN = "Listen";
-    private static final String ACTIVITY = "Activity";
 
     // Conversation Table Say names
     private static final String SAY_ID = "Say_ID";
@@ -67,8 +75,12 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
     // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
+        String CREATE_EVENT_TABLE = "CREATE TABLE " + TABLE_EVENT + "("
+                + KEY_ID + " INTEGER PRIMARY KEY," + EVENT_NAME + " TEXT, " + EVENT_PHOTO + " TEXT, "
+                + EVENT_ICON + " TEXT" + ")";
+        Log.d("EVENT SQL", CREATE_EVENT_TABLE);
         String CREATE_CONVERSATION_TABLE = "CREATE TABLE " + TABLE_CONVO + "("
-                + KEY_ID + " INTEGER PRIMARY KEY," + ACTIVITY + " TEXT " +")";
+                + KEY_ID + " INTEGER PRIMARY KEY," + ACTIVITY + " TEXT, " + EVENT_ID + " TEXT" + ")";
 
         String CREATE_LISTEN_TABLE = "CREATE TABLE " + TABLE_LISTEN +  "("
                 + LISTEN_ID + " INTEGER PRIMARY KEY,"   + CONV_ID + " INTEGER, "  + LISTEN + "  TEXT " + ")";
@@ -79,6 +91,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
                 VIDEO_CATEGORY + "  TEXT, " + VIDEO_DESCRIPTION + "  TEXT, " + VIDEO_NAME + "  TEXT " + ")";
         String CREATE_PHOTO_TABLE = "CREATE TABLE " + TABLE_PHOTO + "("
                 + PHOTO_ID + " INTEGER PRIMARY KEY," + CONV_ID + " INTEGER, " + PHOTO_URL + " TEXT " + ")";
+        db.execSQL(CREATE_EVENT_TABLE);
         db.execSQL(CREATE_CONVERSATION_TABLE);
         db.execSQL(CREATE_LISTEN_TABLE);
         db.execSQL(CREATE_SAY_TABLE);
@@ -96,6 +109,8 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_SAY);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_VIDEO);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PHOTO);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_EVENT);
+
 
         // Create tables again
         onCreate(db);
@@ -105,6 +120,19 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
      * All CRUD(Create, Read, Update, Delete) Operations
      */
 
+    public void addEvent(Event event){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        values.put(KEY_ID, event.getId());
+        values.put(EVENT_NAME, event.getName());
+        if(event.getPhoto()!=null){     values.put(EVENT_PHOTO, event.getPhoto().toString());}
+        if(event.getIcon()!=null){values.put(EVENT_ICON, event.getIcon().toString());}
+
+        // Inserting Row
+        db.insert(TABLE_EVENT, null, values);
+        db.close(); // Closing database connection
+    }
     // Adding new conversation
     public  void addConversation(Conversation conversation) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -163,6 +191,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
         values.put(KEY_ID, conversation.getId()); // Conversation ID
         values.put(ACTIVITY, conversation.getConversationActivity()); // Conversation activity
+        values.put(EVENT_ID, conversation.getConversationEventID());
         // Inserting Row
         db.insert(TABLE_CONVO, null, values);
         db.close(); // Closing database connection
@@ -292,11 +321,53 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
     }
     */
 
+    @Override
+    protected void finalize() throws Throwable {
+        this.close();
+        super.finalize();
+    }
+
+    // Getting All Events
+    public List getAllEvents() {
+        List eventsList = new ArrayList();
+        // Select All Query
+        String selectQuery = "SELECT * FROM " + TABLE_EVENT;
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+
+
+        // cursorListen through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Event event = new Event();
+                event.setId(Integer.parseInt(cursor.getString(0)));
+                event.setName(cursor.getString(1));
+                if(cursor.getString(2) != null) {
+                    event.setPhoto(Uri.parse(cursor.getString(2)));
+                }
+                if(cursor.getString(3) !=null) {
+                    event.setIcon(Uri.parse(cursor.getString(3)));
+                }
+                int event_id = Integer.parseInt(cursor.getString(0));
+
+                ArrayList<Conversation> conversations = new ArrayList<Conversation>();
+
+                conversations = (ArrayList<Conversation>) getAllConversations(event_id);
+                event.setConversations(conversations);
+                eventsList.add(event);
+
+            } while (cursor.moveToNext());
+        }
+
+        // return conversation list
+        return eventsList;
+    }
     // Getting All Conversations
-    public List getAllConversations() {
+    public List getAllConversations(int event_id) {
         List conversationList = new ArrayList();
         // Select All Query
-        String selectQuery = "SELECT * FROM " + TABLE_CONVO;
+        String selectQuery = "SELECT * FROM " + TABLE_CONVO + " WHERE " + EVENT_ID + "=" + event_id;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
@@ -389,6 +460,50 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         return conversationList;
     }
 
+    // Updating single EVENT
+    public void updateEvent(Event event) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ArrayList<Conversation> conversations = event.getConversations();
+        String name = event.getName();
+        Uri photo = event.getPhoto();
+        Uri icon = event.getIcon();
+
+
+        ContentValues eventValues = new ContentValues();
+
+
+        eventValues.put(EVENT_ID, event.getId());
+        eventValues.put(EVENT_NAME, event.getName());
+        eventValues.put(EVENT_PHOTO, event.getPhoto().toString());
+        eventValues.put(EVENT_ICON, event.getIcon().toString());
+
+        db.replace(TABLE_EVENT, null, eventValues);
+
+    }
+
+    // Deleting single event
+    public void deleteEvent(Event event) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        // Delete each conversation
+        ArrayList<Conversation> conversations = event.conversations;
+        for(int i = 0; i < conversations.size(); i++){
+            Conversation conversation = conversations.get(i);
+            db.delete(TABLE_CONVO, KEY_ID + " = ?",
+                    new String[] { String.valueOf(conversation.getId()) });
+            db.delete(TABLE_LISTEN, CONV_ID + " = ?",
+                    new String[] { String.valueOf(conversation.getId()) });
+            db.delete(TABLE_SAY, CONV_ID + " = ?",
+                    new String[] { String.valueOf(conversation.getId()) });
+            db.delete(TABLE_VIDEO, CONV_ID + " = ?",
+                    new String[] { String.valueOf(conversation.getId()) });
+            db.delete(TABLE_PHOTO, CONV_ID + " = ?",
+                    new String[] { String.valueOf(conversation.getId()) });
+        }
+        db.delete(TABLE_EVENT, EVENT_ID + " = ?",
+                new String[] { String.valueOf(event.getId()) });
+        deleteAllConversations();
+        db.close();
+    }
     // Updating single conversation
     public void updateConversation(Conversation conversation) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -433,7 +548,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
             videoValues.put(CONV_ID, videos.get(i).getConv_id());
             videoValues.put(VIDEO_URL, videos.get(i).getUrl());
             videoValues.put(VIDEO_CATEGORY, videos.get(i).getCategory());
-            videoValues.put(VIDEO_DESCRIPTION, videos.get(i).getCategory());
+            videoValues.put(VIDEO_DESCRIPTION, videos.get(i).getDescription());
             videoValues.put(VIDEO_NAME, videos.get(i).getName());
 
             //Log.d("Say", says.get(i));
@@ -458,6 +573,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         db.replace(TABLE_CONVO, null, convoValues);
 
     }
+
 
     // Deleting single conversation
     public void deleteConversation(Conversation conversation) {
@@ -528,6 +644,8 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         db.delete(TABLE_CONVO,null,null);
         db.close();
     }
+
+
 
     // Getting conversations Count
     public int getConversationsCount() {
@@ -625,6 +743,22 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         // return count
     }
 
+    // Get Says max size
+    public int getEventsMaxID() {
+        String countQuery = "SELECT MAX(" +  KEY_ID +  ")  FROM " + TABLE_EVENT   ;
+        SQLiteDatabase db = this.getReadableDatabase();
+        try {
+            Cursor cursor = db.rawQuery(countQuery, null);
+            int maxid = (cursor.moveToFirst() ? cursor.getInt(0) : 0);
+            return maxid;
+
+        }catch (Exception e){
+            return 0;
+        }
+
+        // return count
+    }
+
     // Get Listens size
     public int getSaySize() {
         String countQuery = "SELECT  * FROM " + TABLE_SAY;
@@ -634,5 +768,29 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
         // return count
         return cursor.getInt(0);
+    }
+
+    public String getEventNameByID(int id){
+        String countQuery = "SELECT " + EVENT_NAME + " FROM " + TABLE_EVENT + " WHERE " + KEY_ID + " = " + Integer.toString(id) ;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        cursor.moveToFirst();
+
+
+        // return name
+        return cursor.getString(0);
+
+    }
+
+    public String getEventImageByID(int id){
+        String countQuery = "SELECT " + EVENT_PHOTO + " FROM " + TABLE_EVENT + " WHERE " + KEY_ID + " = " + Integer.toString(id) ;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        cursor.moveToFirst();
+
+
+        // return name
+        return cursor.getString(0);
+
     }
 }
