@@ -594,10 +594,11 @@ public class SetupRobot extends AppCompatActivity  {
             case 1:
                 if(resultCode == RESULT_OK){
                     Uri selectedImage = imageReturnedIntent.getData();
+                    photoId = db.getPhotosMaxID() + 1;
                     PhotoConv photo = new PhotoConv(photoId, conversation_id, selectedImage);
                     photos.add(photo);
                     adptPhoto.notifyDataSetChanged();
-                    photoId += 1;
+                    
                 }
                 break;
         }

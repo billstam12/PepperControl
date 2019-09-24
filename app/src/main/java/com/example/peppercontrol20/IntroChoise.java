@@ -37,7 +37,7 @@ public class IntroChoise extends AppCompatActivity {
         adminButton = findViewById(R.id.lockButton);
 
         if(locked == 0){
-            adminButton.setBackgroundResource(R.drawable.unlock);
+            //adminButton.setBackgroundResource(R.drawable.unlock);
             ViewGroup.LayoutParams params = adminButton.getLayoutParams();
             params.width = 40;
             adminButton.setLayoutParams(params);
@@ -93,7 +93,7 @@ public class IntroChoise extends AppCompatActivity {
 
                             if (emailText.equals("admin") && passwordText.equals("password")) {
 
-                                adminButton.setBackgroundResource(R.drawable.unlock);
+                                //adminButton.setBackgroundResource(R.drawable.unlock);
                                 ViewGroup.LayoutParams params = adminButton.getLayoutParams();
                                 params.width = 40;
                                 adminButton.setLayoutParams(params);
@@ -109,7 +109,7 @@ public class IntroChoise extends AppCompatActivity {
                     } );
                 }
                 else{
-                    adminButton.setBackgroundResource(R.drawable.lock);
+                    //adminButton.setBackgroundResource(R.drawable.lock);
                     locked = 1;
                     editor.putInt("Admin lock", 1).apply();
 

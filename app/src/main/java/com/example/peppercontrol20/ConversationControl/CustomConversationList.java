@@ -573,7 +573,9 @@ public class CustomConversationList extends BaseAdapter implements Observer {
                 conversation.setConversationListen(listens);
                 conversation.setConversationSay(says);
                 conversation.setConversationActivity(spinner.getSelectedItem().toString());
+                conversation.setConversationEventID(event_id);
                 if(spinner.getSelectedItem().toString().equals("Video")){
+                    db.deleteConversationVideos(conversations.get(positionPopup).getId());
                     conversation.setConversationVideo(videos);
                 }
                 else{
@@ -581,6 +583,7 @@ public class CustomConversationList extends BaseAdapter implements Observer {
                 }
 
                 if(spinner.getSelectedItem().toString().equals("Photo")){
+                    db.deleteConversationPhotos(conversations.get(positionPopup).getId());
                     conversation.setConversationPhoto(photos);
 
                 }

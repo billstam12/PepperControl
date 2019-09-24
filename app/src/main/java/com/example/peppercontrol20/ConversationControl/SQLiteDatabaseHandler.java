@@ -569,6 +569,8 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         }
 
         convoValues.put(KEY_ID, conversation.getId());
+        convoValues.put(EVENT_ID, conversation.getConversationEventID());
+
         convoValues.put(ACTIVITY, conversation.getConversationActivity());
         db.replace(TABLE_CONVO, null, convoValues);
 
@@ -790,7 +792,13 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
 
         // return name
-        return cursor.getString(0);
+        try {
+            return cursor.getString(0);
+
+
+        }catch (Exception e){
+            return "";
+        }
 
     }
 }

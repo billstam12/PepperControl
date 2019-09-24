@@ -85,6 +85,7 @@ public class AdminPanel extends AppCompatActivity {
                             db.addEvent(event);
                             events = (ArrayList<Event>) db.getAllEvents();
                             eventAdptr.notifyDataSetChanged();
+                            eventView.setAdapter(eventAdptr);
 
                             pwindo.dismiss();
                         }
