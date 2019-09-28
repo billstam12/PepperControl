@@ -27,9 +27,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.aldebaran.qi.sdk.object.conversation.Listen;
-import com.aldebaran.qi.sdk.object.conversation.ListenResult;
-import com.aldebaran.qi.sdk.object.conversation.Say;
 import com.example.peppercontrol20.Adapters.ListenAdapter;
 import com.example.peppercontrol20.Adapters.PhotoAdapter;
 import com.example.peppercontrol20.Adapters.SayAdapter;
@@ -41,13 +38,9 @@ import com.example.peppercontrol20.ConversationControl.PhotoConv;
 import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 import com.example.peppercontrol20.ConversationControl.SayConv;
 import com.example.peppercontrol20.ConversationControl.VideoConv;
-import com.example.peppercontrol20.Models.Video;
 import com.example.peppercontrol20.R;
 
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class SetupRobot extends AppCompatActivity  {
 
@@ -161,6 +154,7 @@ public class SetupRobot extends AppCompatActivity  {
                 Toast.makeText(getApplicationContext(), "You Selected " + conversations.get(position).getConversationListen() + " as Country", Toast.LENGTH_SHORT).show();
             }
         });
+        photoId = db.getPhotosMaxID() + 1;
         adptPhoto = new PhotoAdapter(this, android.R.layout.simple_list_item_1, photos);
     }
 
@@ -594,7 +588,7 @@ public class SetupRobot extends AppCompatActivity  {
             case 1:
                 if(resultCode == RESULT_OK){
                     Uri selectedImage = imageReturnedIntent.getData();
-                    photoId = db.getPhotosMaxID() + 1;
+                    photoId = photoId + 1;
                     PhotoConv photo = new PhotoConv(photoId, conversation_id, selectedImage);
                     photos.add(photo);
                     adptPhoto.notifyDataSetChanged();

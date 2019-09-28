@@ -3,6 +3,7 @@ package com.example.peppercontrol20;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Icon;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,13 +19,22 @@ import com.example.peppercontrol20.AppActivities.MainActivity;
 import com.example.peppercontrol20.AppActivities.PepperActivity;
 import com.example.peppercontrol20.AppActivities.StartPepper;
 import com.example.peppercontrol20.ConversationControl.AdminPanel;
+import com.example.peppercontrol20.ConversationControl.Event;
+import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import in.myinnos.library.AppIconNameChanger;
 
 public class IntroChoise extends AppCompatActivity {
     Button pepperButton;
     Button serverButton;
     Button adminButton;
     private Dialog pwindo;
-    Integer locked;
+    Integer locked, eventID;
+    ArrayList<Event> events;
+    SQLiteDatabaseHandler db = new SQLiteDatabaseHandler(this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,10 +44,11 @@ public class IntroChoise extends AppCompatActivity {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         locked = sharedPreferences.getInt("Admin lock", 1);
+        eventID = sharedPreferences.getInt("Check", -1);
         adminButton = findViewById(R.id.lockButton);
 
         if(locked == 0){
-            //adminButton.setBackgroundResource(R.drawable.unlock);
+            adminButton.setBackgroundResource(R.drawable.unlock);
             ViewGroup.LayoutParams params = adminButton.getLayoutParams();
             params.width = 40;
             adminButton.setLayoutParams(params);
@@ -46,14 +57,35 @@ public class IntroChoise extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent;
+                String eventName = db.getEventNameByID(eventID);
                 if(locked == 1){
-                    intent = new Intent(IntroChoise.this, StartPepper.class);
+                    // Change app Icon and name
+                    // Active alias name
+                    String activeName = eventName;
 
+                    // Disable alias names
+                    List<String> disableNames = new ArrayList<String>();
+                    disableNames.add(".IntroChoise");
+
+                    // Initiate App Icon Name Changer
+                    new AppIconNameChanger.Builder(IntroChoise.this)
+                            .activeName(activeName) // String
+                            .disableNames(disableNames) // List<String>
+                            .packageName(BuildConfig.APPLICATION_ID)
+                            .build()
+                            .setNow();
+                    intent = new Intent(IntroChoise.this, StartPepper.class);
+                    events = db.getAllEvents();
+                    if(events.size() !=0) {
+                        intent.putExtra("OpenEventID", eventID);
+                        startActivity(intent);
+                    }
                 }
                 else {
                     intent = new Intent(IntroChoise.this, AdminPanel.class);
+                        startActivity(intent);
+
                 }
-                startActivity(intent);
             }
         });
         serverButton.setOnClickListener(new View.OnClickListener() {
@@ -62,12 +94,18 @@ public class IntroChoise extends AppCompatActivity {
                 Intent intent;
                 if(locked == 1){
                     intent = new Intent(IntroChoise.this, StartPepper.class);
+                    events = db.getAllEvents();
+                    if(events.size() !=0) {
+                        intent.putExtra("OpenEventID", eventID);
+                        startActivity(intent);
+                    }
 
                 }
                 else {
                     intent = new Intent(IntroChoise.this, MainActivity.class);
+                    startActivity(intent);
                 }
-                startActivity(intent);
+
             }
         });
         adminButton.setOnClickListener(new View.OnClickListener() {
@@ -93,7 +131,7 @@ public class IntroChoise extends AppCompatActivity {
 
                             if (emailText.equals("admin") && passwordText.equals("password")) {
 
-                                //adminButton.setBackgroundResource(R.drawable.unlock);
+                                adminButton.setBackgroundResource(R.drawable.unlock);
                                 ViewGroup.LayoutParams params = adminButton.getLayoutParams();
                                 params.width = 40;
                                 adminButton.setLayoutParams(params);
@@ -109,7 +147,7 @@ public class IntroChoise extends AppCompatActivity {
                     } );
                 }
                 else{
-                    //adminButton.setBackgroundResource(R.drawable.lock);
+                    adminButton.setBackgroundResource(R.drawable.lock);
                     locked = 1;
                     editor.putInt("Admin lock", 1).apply();
 

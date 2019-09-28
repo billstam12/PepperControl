@@ -11,6 +11,7 @@
     <uses-feature android:name="com.softbank.hardware.pepper" />
 
     <application
+
         android:allowBackup="true"
         android:configChanges="orientation|keyboardHidden"
         android:icon="@mipmap/ic_launcher"
@@ -35,6 +36,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity-alias
+            android:name=".IntroChoise"
+            android:targetActivity=".IntroChoise"
+            android:label="Pepper Control"
+            android:icon="@mipmap/ic_launcher"
+            ></activity-alias>
         <activity android:name=".AppActivities.SetupRobot" />
         <activity
             android:name=".Controllers.RobotController"

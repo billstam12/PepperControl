@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.myinnos:AppIconNameChanger:1.0.7@aar">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/AppIconNameChanger-1.0.7.aar/232b33095d888ed8ee864febc6d8421f/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/AppIconNameChanger-1.0.7.aar/232b33095d888ed8ee864febc6d8421f/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.myinnos/AppIconNameChanger/1.0.7/2cbe7955db288bd7b60cbb7f53caf9a6a97c9c51/AppIconNameChanger-1.0.7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

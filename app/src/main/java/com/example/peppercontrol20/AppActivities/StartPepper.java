@@ -51,6 +51,8 @@ import com.example.peppercontrol20.ConversationControl.ListenConv;
 import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 import com.example.peppercontrol20.ConversationControl.SayConv;
 
+import com.example.peppercontrol20.ConversationControl.VideoConv;
+import com.example.peppercontrol20.MediaPlayers.SingleMedia;
 import com.example.peppercontrol20.MediaPlayers.VideoPlayers;
 import com.example.peppercontrol20.R;
 
@@ -67,10 +69,7 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     private Animate animate;
     private MediaPlayer mediaPlayerGuitar;
     private MediaPlayer mediaPlayerDisco;
-    private Dialog mVideoDialog ;
-    private VideoView videoView;
-    private MediaController controller;
-    private PopupWindow pwindo;
+
 
     private static final String TAG = "Chatbot" ;
 
@@ -80,98 +79,31 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     private ArrayList<ListenConv> listenConv;
     private ArrayList<SayConv> sayConv;
     private String activity;
-    private ArrayList<PhraseSet> pepperPhrases;
-    private ArrayList<String> pepperResponses;
-    private Listen pepperListen;
-    ArrayList<Conversation> conversations;
-    private ArrayAdapter<String> chatAdapter;
-    private ArrayList<String> chatMessages;
-    private BluetoothAdapter bluetoothAdapter;
 
-    public static final int MESSAGE_STATE_CHANGE = 1;
-    public static final int MESSAGE_READ = 2;
-    public static final int MESSAGE_WRITE = 3;
-    public static final int MESSAGE_DEVICE_OBJECT = 4;
-    public static final int MESSAGE_TOAST = 5;
-    public static final String DEVICE_OBJECT = "Robot";
-    private BluetoothDevice connectingDevice;
+    ArrayList<Conversation> conversations;
+
+
     private ListView listView;
     private ImageView wallpaper;
-    private static final int REQUEST_ENABLE_BLUETOOTH = 1;
-    private ChatController chatController;
     public TextView txtView ;
     int event_id;
     SQLiteDatabaseHandler db; //Database
-    private Handler handler = new Handler(new Handler.Callback() {
 
-        @Override
-        public boolean handleMessage(Message msg) {
-            Log.d("Message,",msg.toString());
-
-            switch (msg.what) {
-                case MESSAGE_STATE_CHANGE:
-                    switch (msg.arg1) {
-                        case ChatController.STATE_CONNECTED:
-                            setStatus("Connected to: " + connectingDevice.getName());
-                            //btnConnect.setEnabled(false);
-                            break;
-                        case ChatController.STATE_CONNECTING:
-                            setStatus("Connecting...");
-                            //btnConnect.setEnabled(false);
-                            break;
-                        case ChatController.STATE_LISTEN:
-                        case ChatController.STATE_NONE:
-                            setStatus("Not connected");
-                            //btnConnect.setEnabled(true);
-                            break;
-                    }
-                    break;
-                case MESSAGE_WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    Log.d("Where,","WRITE");
-
-                    String writeMessage = new String(writeBuf);
-                    chatMessages.add("Me: " + writeMessage);
-                    chatAdapter.notifyDataSetChanged();
-                    break;
-                case MESSAGE_READ:
-                    byte[] readBuf = (byte[]) msg.obj;
-                    Log.d("Where,","READ");
-
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-                    chatMessages.add(connectingDevice.getName() + ":  " + readMessage);
-                    chatAdapter.notifyDataSetChanged();
-
-                    break;
-                case MESSAGE_DEVICE_OBJECT:
-
-                    connectingDevice = msg.getData().getParcelable(DEVICE_OBJECT);
-                    Toast.makeText(getApplicationContext(), "Connected to " + connectingDevice.getName(),
-                            Toast.LENGTH_SHORT).show();
-                    break;
-                case MESSAGE_TOAST:
-                    Toast.makeText(getApplicationContext(), msg.getData().getString("toast"),
-                            Toast.LENGTH_SHORT).show();
-                    break;
-            }
-            return false;
-        }
-    });
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_pepper);
-        //Intent intent = getIntent();
-        //chatController = (ChatController) intent.getSerializableExtra("chatController");
         listView = (ListView) findViewById(R.id.list);
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
 
         Intent startIntent = getIntent();
+        event_id = startIntent.getIntExtra("OpenEventID", -1);
         db = new SQLiteDatabaseHandler(this);
         wallpaper = findViewById(R.id.eventWallpaper);
-        event_id = startIntent.getIntExtra("Event", db.getEventsMaxID());
+
+
         if(db.getEventImageByID(event_id)!=null) {
             wallpaper.setImageURI(Uri.parse(db.getEventImageByID(event_id)));
         }
@@ -179,27 +111,7 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         status = findViewById(R.id.status);
         mediaPlayerGuitar = MediaPlayer.create(this, R.raw.wholelottalove);
         mediaPlayerDisco = MediaPlayer.create(this, R.raw.disco);
-        /*
-        if (savedInstanceState != null) {
-            // Restore value of members from saved state
-            status.setText(savedInstanceState.getString("CONNECT"));
-            chatMessages = (ArrayList<String>) savedInstanceState.getSerializable("LIST");
-            //Update UI
-            //chatAdapter.notifyDataSetChanged();
-        }
-        else {
-            // Probably initialize members with default values for a new instance
-            status.setText("Not connected!");
-            chatMessages = new ArrayList<>();
-            chatAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, chatMessages);
-            //set chat adapter
-            listView.setAdapter(chatAdapter);
-        }
-        */
 
-        //status.setText(getIntent().getStringExtra("connectionTest"));
-        //chatController = ChatController.getInstance(handler);
-        //Log.d("State of controller", Integer.toString(chatController.getState()));
         QiSDK.register(this, this);
 
 
@@ -212,9 +124,6 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     public void onRobotFocusGained(QiContext qiContext) {
         //Get Intro
         this.qiContext = qiContext;
-        chatController = ChatController.getInstance(handler);
-        Boolean holdFlag = false;
-
 
         //Init Introduction
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -223,7 +132,6 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         Phrase introPhrase = new Phrase(introduction);
         sayIntro = SayBuilder.with(qiContext)
                 .withPhrase(introPhrase)
-                //.withLocale(locale)
                 .build();
         sayIntro.run();
 
@@ -303,10 +211,10 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
 
 
     @Override
-    public  void onDestroy(){
+    protected void onDestroy() {
+        // Unregister the RobotLifecycleCallbacks for this Activity.
         QiSDK.unregister(this, this);
         super.onDestroy();
-
     }
 
     class MyQiChatExecutor extends BaseQiChatExecutor {
@@ -350,13 +258,27 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     }
     public  void playVideo(QiContext qiContext, int conversationID){
         Log.d("Window","Opening Window: " + Integer.toString(conversationID));
-        Intent i = new Intent(qiContext, VideoPlayers.class);
-        // sending data process
-        i.putExtra("Video ID", conversationID);
-        try {
+        ArrayList<VideoConv> videos = db.getVideos(conversationID);
+        if(videos.size() == 1){
+            VideoConv singleVideo = videos.get(0);
+            Intent i = new Intent(qiContext, SingleMedia.class);
+
+
+            i.putExtra("Video Name", singleVideo.name);
+            i.putExtra("Video Description", singleVideo.description);
+            i.putExtra("Video Category", singleVideo.category);
+            i.putExtra("Video URL", singleVideo.url);
             qiContext.startActivity(i);
-        }catch (Exception e){
-            Log.d("ERROR", e.toString());
+        }
+        else {
+            Intent i = new Intent(qiContext, VideoPlayers.class);
+            // sending data process
+            i.putExtra("Video ID", conversationID);
+            try {
+                qiContext.startActivity(i);
+            } catch (Exception e) {
+                Log.d("ERROR", e.toString());
+            }
         }
         Log.d("Window","Closed Window");
 
@@ -431,7 +353,6 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         // Always call the superclass so it can save the view hierarchy state
         super.onRestoreInstanceState(savedInstanceState);
         status.setText(savedInstanceState.getString("CONNECT"));
-        chatMessages = (ArrayList<String>) savedInstanceState.getSerializable("LIST");
         //chatAdapter.notifyDataSetChanged();
 
     }

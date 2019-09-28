@@ -1,5 +1,6 @@
 package com.example.peppercontrol20.MediaPlayers;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,6 +39,7 @@ public class VideoPlayers extends AppCompatActivity {
 
         lstVideos = db.getVideos(id);
         setRvadapter(lstVideos);
+
 
     }
 

@@ -130,7 +130,7 @@ public class PepperActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(PepperActivity.this, StartPepper.class);
-                intent.putExtra("Event", event_id);
+                intent.putExtra("OpenEventID", event_id);
                 //intent.putExtra("chatController", chatController);
                 startActivity(intent);
             }

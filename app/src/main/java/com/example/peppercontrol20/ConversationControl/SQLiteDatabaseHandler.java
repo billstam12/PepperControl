@@ -328,8 +328,8 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Getting All Events
-    public List getAllEvents() {
-        List eventsList = new ArrayList();
+    public ArrayList<Event> getAllEvents() {
+        ArrayList<Event> eventsList = new ArrayList();
         // Select All Query
         String selectQuery = "SELECT * FROM " + TABLE_EVENT;
         SQLiteDatabase db = this.getWritableDatabase();
@@ -472,10 +472,10 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         ContentValues eventValues = new ContentValues();
 
 
-        eventValues.put(EVENT_ID, event.getId());
+        eventValues.put(KEY_ID, event.getId());
         eventValues.put(EVENT_NAME, event.getName());
-        eventValues.put(EVENT_PHOTO, event.getPhoto().toString());
-        eventValues.put(EVENT_ICON, event.getIcon().toString());
+        if(event.getPhoto()!=null){ eventValues.put(EVENT_PHOTO, event.getPhoto().toString()); }
+        if(event.getIcon()!=null){ eventValues.put(EVENT_ICON, event.getIcon().toString());}
 
         db.replace(TABLE_EVENT, null, eventValues);
 
@@ -485,9 +485,11 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
     public void deleteEvent(Event event) {
         SQLiteDatabase db = this.getWritableDatabase();
         // Delete each conversation
-        ArrayList<Conversation> conversations = event.conversations;
+        List<Conversation> conversations = getAllConversations(event.getId());
         for(int i = 0; i < conversations.size(); i++){
             Conversation conversation = conversations.get(i);
+            Log.d("Deleting Conversation", Integer.toString(conversation.id));
+
             db.delete(TABLE_CONVO, KEY_ID + " = ?",
                     new String[] { String.valueOf(conversation.getId()) });
             db.delete(TABLE_LISTEN, CONV_ID + " = ?",
@@ -499,9 +501,8 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
             db.delete(TABLE_PHOTO, CONV_ID + " = ?",
                     new String[] { String.valueOf(conversation.getId()) });
         }
-        db.delete(TABLE_EVENT, EVENT_ID + " = ?",
+        db.delete(TABLE_EVENT, KEY_ID + " = ?",
                 new String[] { String.valueOf(event.getId()) });
-        deleteAllConversations();
         db.close();
     }
     // Updating single conversation
@@ -780,7 +781,14 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
 
         // return name
-        return cursor.getString(0);
+        // return name
+        try {
+            return cursor.getString(0);
+
+
+        }catch (Exception e){
+            return "";
+        }
 
     }
 

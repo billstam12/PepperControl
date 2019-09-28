@@ -3,11 +3,13 @@ package com.example.peppercontrol20.ConversationControl;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -173,12 +175,32 @@ public class CustomConversationList extends BaseAdapter implements Observer {
             public void onClick(View view) {
                 Log.d("Last Index", "" + positionPopup);
                 //     Integer index = (Integer) view.getTag();
-                db.deleteConversation(conversations.get(positionPopup));
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setCancelable(true);
+                builder.setTitle("Are you sure about that?");
+                builder.setMessage("This will delete the conversation, click Confirm to continue or cancel to go back.");
+                builder.setPositiveButton("Confirm",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                db.deleteConversation(conversations.get(positionPopup));
 
-                //      countries.remove(index.intValue());
-                conversations = (ArrayList) db.getAllConversations(event_id);
-                Log.d("Conversations size", "" + conversations.size());
-                notifyDataSetChanged();
+                                //      countries.remove(index.intValue());
+                                conversations = (ArrayList) db.getAllConversations(event_id);
+                                Log.d("Conversations size", "" + conversations.size());
+                                notifyDataSetChanged();
+                            }
+
+                        });
+                builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
             }
         });
         return  row;
