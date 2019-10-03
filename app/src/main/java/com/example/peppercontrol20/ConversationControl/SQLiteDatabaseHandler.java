@@ -46,7 +46,8 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_ID = "id";
     private static final String EVENT_ID = "Event_ID";
     private static final String ACTIVITY = "Activity";
-
+    private static final String PROACTIVE = "Proactive";
+    private static final String PROACTIVE_ENGAGEMENT  = "Proactive_Engagement";
 
     // Conversation Table Listen names
     private static final String LISTEN_ID = "Listen_ID";
@@ -80,7 +81,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
                 + EVENT_ICON + " TEXT" + ")";
         Log.d("EVENT SQL", CREATE_EVENT_TABLE);
         String CREATE_CONVERSATION_TABLE = "CREATE TABLE " + TABLE_CONVO + "("
-                + KEY_ID + " INTEGER PRIMARY KEY," + ACTIVITY + " TEXT, " + EVENT_ID + " TEXT" + ")";
+                + KEY_ID + " INTEGER PRIMARY KEY," + ACTIVITY + " TEXT, " + PROACTIVE + " INTEGER, " + PROACTIVE_ENGAGEMENT + " TEXT, " + EVENT_ID + " TEXT" + ")";
 
         String CREATE_LISTEN_TABLE = "CREATE TABLE " + TABLE_LISTEN +  "("
                 + LISTEN_ID + " INTEGER PRIMARY KEY,"   + CONV_ID + " INTEGER, "  + LISTEN + "  TEXT " + ")";
@@ -192,6 +193,10 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_ID, conversation.getId()); // Conversation ID
         values.put(ACTIVITY, conversation.getConversationActivity()); // Conversation activity
         values.put(EVENT_ID, conversation.getConversationEventID());
+        values.put(PROACTIVE, conversation.getConversationProactive());
+        values.put(PROACTIVE_ENGAGEMENT, conversation.getConversationProactiveEngagement());
+
+
         // Inserting Row
         db.insert(TABLE_CONVO, null, values);
         db.close(); // Closing database connection
@@ -290,6 +295,29 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         return activity;
     }
 
+    public int getProactive(int id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursorSay = db.query(TABLE_CONVO, new String[] {PROACTIVE}, KEY_ID + "=?",
+                new String[] { String.valueOf(id) }, null, null, null, null);
+        Integer proactive = 0;
+        for(cursorSay.moveToFirst(); !cursorSay.isAfterLast(); cursorSay.moveToNext()) {
+            // The Cursor is now set to the right position
+            proactive = (cursorSay.getInt(0));
+        }
+        return proactive;
+    }
+
+    public String getProactiveEngagement(int id){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursorSay = db.query(TABLE_CONVO, new String[] {PROACTIVE_ENGAGEMENT}, KEY_ID + "=?",
+                new String[] { String.valueOf(id) }, null, null, null, null);
+        String proactive_engagement = new String();
+        for(cursorSay.moveToFirst(); !cursorSay.isAfterLast(); cursorSay.moveToNext()) {
+            // The Cursor is now set to the right position
+            proactive_engagement = (cursorSay.getString(0));
+        }
+        return proactive_engagement;
+    }
     // Getting single conversation
     /*
     public  Conversation getConversation(int id) {
@@ -379,6 +407,10 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
                 Conversation conversation = new Conversation();
                 conversation.setId(Integer.parseInt(cursor.getString(0)));
                 conversation.setConversationActivity(cursor.getString(1));
+                conversation.setConversationProactive(cursor.getInt(2));
+                conversation.setConversationProactiveEngagement(cursor.getString(3));
+                conversation.setConversationEventID(cursor.getInt(4));
+
                 int conv_id = Integer.parseInt(cursor.getString(0));
 
                 String selectQuerySay = "SELECT  * FROM " + TABLE_SAY + " WHERE " + CONV_ID +"=" + conv_id;
@@ -451,6 +483,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
                 conversation.setConversationSay(says);
                 conversation.setConversationVideo(videos);
                 conversation.setConversationPhoto(photos);
+
                 // Adding conversation to list
                 conversationList.add(conversation);
             } while (cursor.moveToNext());
@@ -571,7 +604,8 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
         convoValues.put(KEY_ID, conversation.getId());
         convoValues.put(EVENT_ID, conversation.getConversationEventID());
-
+        convoValues.put(PROACTIVE, conversation.getConversationProactive());
+        convoValues.put(PROACTIVE_ENGAGEMENT, conversation.getConversationProactiveEngagement());
         convoValues.put(ACTIVITY, conversation.getConversationActivity());
         db.replace(TABLE_CONVO, null, convoValues);
 

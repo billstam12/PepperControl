@@ -14,11 +14,30 @@ public class Conversation{
     ArrayList<VideoConv> video;
     ArrayList<PhotoConv> photo;
     String activity;
+    String proactive_engagement;
+    Integer is_proactive;
 
+
+    public String getConversationProactiveEngagement() {
+        return proactive_engagement;
+    }
+
+    public void setConversationProactiveEngagement(String proactive_engagement) {
+        this.proactive_engagement = proactive_engagement;
+    }
 
     public Conversation() {
         super();
     }
+
+    public Integer getConversationProactive() {
+        return is_proactive;
+    }
+
+    public void setConversationProactive(Integer is_proactive) {
+        this.is_proactive = is_proactive;
+    }
+
     public Conversation(int i, int event_id, ArrayList<ListenConv> listen, ArrayList<SayConv> say, ArrayList<VideoConv> video, ArrayList<PhotoConv> photo, String activity) {
         super();
         this.id = i;
@@ -28,6 +47,21 @@ public class Conversation{
         this.video = video;
         this.activity = activity;
         this.photo = photo;
+        this.is_proactive = 0;
+        this.proactive_engagement = "";
+    }
+
+    public Conversation(int i, int event_id, ArrayList<ListenConv> listen, ArrayList<SayConv> say, ArrayList<VideoConv> video, ArrayList<PhotoConv> photo, String activity, String proactive_engagement) {
+        super();
+        this.id = i;
+        this.event_id = event_id;
+        this.listen = listen;
+        this.say = say;
+        this.video = video;
+        this.activity = activity;
+        this.photo = photo;
+        this.proactive_engagement = proactive_engagement;
+        this.is_proactive = 1;
     }
 
     // constructor

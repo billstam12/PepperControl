@@ -18,6 +18,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -63,8 +65,9 @@ public class CustomConversationList extends BaseAdapter implements Observer {
     Button addVideo;
     Button saveVideo;
     Button addPhoto;
-
+    CheckBox btnMakeProactive;
     Button videoxButton;
+
     EditText videoURL;
     EditText videoDESC;
     EditText videoCAT;
@@ -81,9 +84,10 @@ public class CustomConversationList extends BaseAdapter implements Observer {
     PhotoAdapter adptPhoto;
     ListView videoView;
     ListView photoView;
-
+    EditText proactiveEngagement;
     public int listenIDPad = 1;
     public int sayIDPad = 1;
+    public int isProactive = 0;
 
 
     public CustomConversationList(Activity context, ArrayList<Conversation> conversations, SQLiteDatabaseHandler db, int event_id) {
@@ -149,16 +153,24 @@ public class CustomConversationList extends BaseAdapter implements Observer {
             vh = (ViewHolder) convertView.getTag();
 
         }
-
+        String firstListen;
         String firstSay = conversations.get(position).getConversationSay().get(0).getSay();
-        String firstListen = conversations.get(position).getConversationListen().get(0).getListen();
+        if(conversations.get(position).getConversationProactive() == 1){
+            firstListen = conversations.get(position).getConversationProactiveEngagement();
+            vh.textViewId.setText("Proactive" + conversations.get(position).getId());
+
+        }
+        else {
+            firstListen = conversations.get(position).getConversationListen().get(0).getListen();
+            vh.textViewId.setText("" + conversations.get(position).getId());
+
+        }
         if(firstSay.length() > 10){
             firstSay = firstSay.substring(0,10) + "...";
         }
         if(firstListen.length() > 10){
             firstListen = firstListen.substring(0,10) + "...";
         }
-        vh.textViewId.setText("" + conversations.get(position).getId());
         vh.textViewListen.setText(firstListen);
         vh.textViewSay.setText(firstSay);
         final int positionPopup = position;
@@ -231,6 +243,9 @@ public class CustomConversationList extends BaseAdapter implements Observer {
         pwindo.setContentView(R.layout.edit_popup);
         pwindo.show();
 
+        LinearLayout listenLayout = pwindo.findViewById(R.id.editLayout);
+        LinearLayout proactiveLayout = pwindo.findViewById(R.id.proactiveEngagementLayout);
+        proactiveEngagement = pwindo.findViewById(R.id.proactiveEngagement);
         listenText = (EditText) pwindo.findViewById(R.id.editTextListen);
         sayText = (EditText) pwindo.findViewById(R.id.editTextSay);
         listenView = (MyListView) pwindo.findViewById(R.id.listViewListen);
@@ -241,7 +256,7 @@ public class CustomConversationList extends BaseAdapter implements Observer {
         addVideo = pwindo.findViewById(R.id.addVideoButton);
         addPhoto = pwindo.findViewById(R.id.addPhotoButton);
         spinner = pwindo.findViewById(R.id.spinnerActivity);
-
+        btnMakeProactive = pwindo.findViewById(R.id.proactiveButton);
 
         ArrayList<Integer> listenIdsForDel = new ArrayList<>();
         ArrayList<Integer> sayIdsForDel = new ArrayList<>();
@@ -282,19 +297,42 @@ public class CustomConversationList extends BaseAdapter implements Observer {
         final ListenAdapter adptListen = new ListenAdapter(context, android.R.layout.simple_list_item_1, listens);
         final SayAdapter adptSay = new SayAdapter(context, android.R.layout.simple_list_item_1, says);
         adptPhoto = new PhotoAdapter(context, android.R.layout.simple_list_item_1, photos);
-        //Old Sol
-        /*
-        final ArrayAdapter<String> adptListen = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, listensText);
-        final ArrayAdapter<String> adptSay = new ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, saysText);
-        */
         adptVideo = new VideoAdapter(context, android.R.layout.simple_list_item_1, videos);
-
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, context.getResources().getStringArray(R.array.activities));
 
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         listenView.setAdapter(adptListen);
 
+        // Check if proactive
+        isProactive = db.getProactive(conversations.get(positionPopup).getId());
+        if(isProactive == 1){
+            proactiveLayout.setVisibility(View.VISIBLE);
+            btnMakeProactive.setChecked(true);
+            isProactive = 1;
+        }
+        else {
+            proactiveLayout.setVisibility(View.GONE);
+            btnMakeProactive.setChecked(false);
+            listenLayout.setVisibility(View.VISIBLE);
+        }
+        // Make proactive
+        btnMakeProactive.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    proactiveLayout.setVisibility(View.VISIBLE);
+                    isProactive = 1;
+                }
+                else{
+                    proactiveLayout.setVisibility(View.GONE);
+                    listenLayout.setVisibility(View.VISIBLE);
+                    isProactive = 0;
+
+                }
+            }
+        });
+        proactiveEngagement.setText(conversations.get(positionPopup).getConversationProactiveEngagement());
         /* Add longpress to Edit */
         listenView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -596,6 +634,8 @@ public class CustomConversationList extends BaseAdapter implements Observer {
                 conversation.setConversationSay(says);
                 conversation.setConversationActivity(spinner.getSelectedItem().toString());
                 conversation.setConversationEventID(event_id);
+                conversation.setConversationProactive(isProactive);
+
                 if(spinner.getSelectedItem().toString().equals("Video")){
                     db.deleteConversationVideos(conversations.get(positionPopup).getId());
                     conversation.setConversationVideo(videos);
@@ -613,11 +653,27 @@ public class CustomConversationList extends BaseAdapter implements Observer {
                     db.deleteConversationPhotos(conversations.get(positionPopup).getId());
                 }
                 Log.d("Updating: ", "" + positionPopup);
+                Log.d("Proactive Engagement", proactiveEngagement.getText().toString());
 
-                db.updateConversation(conversation);
+                if(isProactive == 1){
+                    Log.d("Got in", "1");
+                    if(!proactiveEngagement.getText().toString().equals("")){
+                        conversation.setConversationProactiveEngagement(proactiveEngagement.getText().toString());
+                        db.updateConversation(conversation);
+                        pwindo.dismiss();
+                    }
+                }
+                else{
+                    Log.d("Got in", "2");
+                    Log.d("Listens size", Integer.toString(listens.size()));
+                    Log.d("Says size", Integer.toString(says.size()));
+                    if(listens.size()!=0 && says.size()!=0){
+                        db.updateConversation(conversation);
+                        pwindo.dismiss();
+                    }
+                }
                 notifyDataSetChanged();
 
-                pwindo.dismiss();
             }
         });
 

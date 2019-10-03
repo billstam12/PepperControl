@@ -11,7 +11,6 @@
     <uses-feature android:name="com.softbank.hardware.pepper" />
 
     <application
-
         android:allowBackup="true"
         android:configChanges="orientation|keyboardHidden"
         android:icon="@mipmap/ic_launcher"
@@ -20,7 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ConversationControl.AdminPanel"></activity>
+        <activity android:name=".AppActivities.Proactive"  android:theme="@style/Theme.Transparent"></activity>
+        <activity android:name=".AppActivities.AdminPanel" />
         <activity android:name=".AppActivities.PhotoPresentation" />
         <activity android:name=".AppActivities.StartPepper" />
         <activity android:name=".MediaPlayers.VideoPlayers" />
@@ -36,12 +36,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity-alias
-            android:name=".IntroChoise"
-            android:targetActivity=".IntroChoise"
-            android:label="Pepper Control"
-            android:icon="@mipmap/ic_launcher"
-            ></activity-alias>
         <activity android:name=".AppActivities.SetupRobot" />
         <activity
             android:name=".Controllers.RobotController"

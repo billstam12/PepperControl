@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 public class Event {
 
-    int id;
-    String name;
-    Uri photo;
+    public int id;
+    public String name;
+    public Uri photo;
 
     public ArrayList<Conversation> getConversations() {
         return conversations;

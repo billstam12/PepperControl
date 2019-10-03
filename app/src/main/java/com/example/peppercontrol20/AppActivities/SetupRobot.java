@@ -19,10 +19,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,6 +62,9 @@ public class SetupRobot extends AppCompatActivity  {
     Button btnAddListen;
     Button btnAddSay;
     Button btnSoundSay;
+    CheckBox btnMakeProactive;
+    EditText proactiveEngagement;
+    String proactiveEngagementText;
     Button xButton;
     Button addVideo;
     Button addPhoto;
@@ -88,6 +94,7 @@ public class SetupRobot extends AppCompatActivity  {
     VideoAdapter adptVideo;
     ImageView imageView;
     PhotoAdapter adptPhoto;
+    public Boolean isProactive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +108,8 @@ public class SetupRobot extends AppCompatActivity  {
 
         db = new SQLiteDatabaseHandler(this);
         event_id = startIntent.getIntExtra("Event", db.getEventsMaxID());
-
+        tmpSayId = db.getSaysMaxID();
+        tmpListenId = db.getListenMaxID();
         listView = (ListView) findViewById(android.R.id.list);
 
         //final LinearLayout et2 =(LinearLayout) newView.getChildAt(newView.getChildCount());
@@ -135,10 +143,7 @@ public class SetupRobot extends AppCompatActivity  {
 
 
         conversations = (ArrayList<Conversation>) db.getAllConversations(event_id);
-        conversation_id = db.getConvoMaxID();
-        if(conversation_id != 0 ){
-            conversation_id +=1;
-        }
+        conversation_id = db.getConvoMaxID() + 1;
         for (Conversation conversation : conversations) {
             String log = "Id: " + conversation.getId() + " ,Listen: " + conversation.getConversationListen() + " ,Say: " + conversation.getConversationSay();
             // Writing Conversations to log
@@ -168,7 +173,8 @@ public class SetupRobot extends AppCompatActivity  {
         pwindo = new Dialog(this);
         pwindo.setContentView(R.layout.edit_popup);
         pwindo.show();
-
+        LinearLayout listenLayout = pwindo.findViewById(R.id.editLayout);
+        LinearLayout proactiveLayout = pwindo.findViewById(R.id.proactiveEngagementLayout);
         listenText = (EditText) pwindo.findViewById(R.id.editTextListen);
         sayText = (EditText) pwindo.findViewById(R.id.editTextSay);
         listenView = (ListView) pwindo.findViewById(R.id.listViewListen);
@@ -177,6 +183,8 @@ public class SetupRobot extends AppCompatActivity  {
         btnAddListen = pwindo.findViewById(R.id.listenButton);
         btnAddSay = pwindo.findViewById(R.id.sayButton);
         btnSoundSay = pwindo.findViewById(R.id.saySound);
+        btnMakeProactive = pwindo.findViewById(R.id.proactiveButton);
+        proactiveEngagement = pwindo.findViewById(R.id.proactiveEngagement);
         xButton = pwindo.findViewById(R.id.x_button);
 
         photos = new ArrayList<>();
@@ -192,8 +200,23 @@ public class SetupRobot extends AppCompatActivity  {
 
         photoView.setAdapter(adptPhoto);
         videoView.setAdapter(adptVideo);
-        //final ArrayList<String> listensText = new ArrayList<String>();
-        //final ArrayList<String> saysText = new ArrayList<String>();
+
+        // Make proactive
+        btnMakeProactive.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    proactiveLayout.setVisibility(View.VISIBLE);
+                    isProactive = true;
+                }
+                else{
+                    listenLayout.setVisibility(View.VISIBLE);
+                    proactiveLayout.setVisibility(View.GONE);
+                    isProactive = false;
+
+                }
+            }
+        });
 
         final ListenAdapter adptListen = new ListenAdapter(this,
                 android.R.layout.simple_list_item_1, tmpListens);
@@ -318,7 +341,7 @@ public class SetupRobot extends AppCompatActivity  {
                 if(listen!= ""){
                     ListenConv tmpListen = new ListenConv();
                     //saysText.add(say);
-                    tmpListenId = db.getListenMaxID() + 1;
+                    tmpListenId += 1;
                     Log.d("Max listen ID", Integer.toString(db.getListenMaxID()));
                     tmpListen = new ListenConv(tmpListenId, conversation_id, listen);
                     tmpListens.add(tmpListen);
@@ -337,7 +360,7 @@ public class SetupRobot extends AppCompatActivity  {
                 if(say!= ""){
                     SayConv tmpSay = new SayConv();
                     //saysText.add(say);
-                    tmpSayId = db.getSaysMaxID() + 1;
+                    tmpSayId  += 1;
                     Log.d("Max Say ID", Integer.toString(db.getListenMaxID()));
                     tmpSay = new SayConv(tmpSayId, conversation_id, say);
                     tmpSays.add(tmpSay);
@@ -514,30 +537,29 @@ public class SetupRobot extends AppCompatActivity  {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final ArrayList<ListenConv> listens = new ArrayList<ListenConv>();
-                final ArrayList<SayConv> says = new ArrayList<SayConv>();
 
                 final String conversationActivity = spinner.getSelectedItem().toString(); // Small, Medium, Large
 
-                int maxListenId = db.getListenMaxID();
-                int maxSayId = db.getSaysMaxID();
-                //New sol
-                for(int i = 0; i < tmpListens.size(); i++){
-                    Log.d("Listen ", tmpListens.get(i).listen);
-                    listens.add(tmpListens.get(i));
-                }
 
-                for(int i = 0; i < tmpSays.size(); i++){
-                    Log.d("Say ", tmpSays.get(i).say);
-                    says.add(tmpSays.get(i));
-                }
+               if(isProactive) {
+                    Conversation conversation = new Conversation(conversation_id, event_id, tmpListens, tmpSays, videos, photos, conversationActivity, proactiveEngagement.getText().toString());
+                    conversation.setConversationProactive(1);
+                    Log.d("Proactive Engagement", proactiveEngagement.getText().toString());
 
-
-                Conversation conversation = new Conversation(conversation_id, event_id, listens, says, videos, photos, conversationActivity);
-                if(listens.size()!=0 && says.size()!=0) {
-                    db.addConversation(conversation);
-                    conversation_id++;
+                    if(!proactiveEngagement.getText().toString().equals("")) {
+                        conversation_id++;
+                        db.addConversation(conversation);
+                    }
                 }
+                else{
+                    Conversation conversation = new Conversation(conversation_id, event_id, tmpListens, tmpSays, videos, photos, conversationActivity);
+                    conversation.setConversationProactive(0);
+                    if(tmpListens.size()!=0 && tmpSays.size()!=0) {
+                        conversation_id++;
+                        db.addConversation(conversation);
+                    }
+                }
+                isProactive = false;
                 if(customConversationList==null)
                 {
                     customConversationList = new CustomConversationList(activity, conversations, db, event_id);

@@ -50,7 +50,56 @@
 
 
     </LinearLayout>
-    <LinearLayout
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:paddingTop="5dp"
+                android:text="Click the button to make the conversation proactive:"
+                android:textColor="@color/white" />
+
+            <CheckBox
+                android:id="@+id/proactiveButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginLeft="20dp"
+                android:gravity="center" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="25dp"
+            android:visibility="gone"
+            android:id="@+id/proactiveEngagementLayout">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="5dp"
+                android:textColor="@color/white"
+                android:text="I Engage with:"/>
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Write a Phrase for me to Listen"
+                android:textColorHint="@color/white"
+
+                android:background="@drawable/editbuttonshape"
+                android:textColor="@color/white"
+                android:layout_gravity="left"
+
+                android:id="@+id/proactiveEngagement"/>
+        </LinearLayout>
+
+        <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -92,6 +141,7 @@
             android:id="@+id/listViewListen"
             />
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -203,43 +253,47 @@
 
                 />
         </LinearLayout>
+
+
+
         <LinearLayout
+            android:id="@+id/photoLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_marginTop="25dp"
-            android:id="@+id/photoLayout"
+            android:orientation="vertical"
             android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="5dp"
-                android:textColor="@color/white"
-                android:text="Add Photos for this conversation"/>
+                android:text="Add Photos for this conversation"
+                android:textColor="@color/white" />
 
             <Button
+                android:id="@+id/addPhotoButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add Photo"
-                android:textColor="@color/white"
                 android:layout_gravity="right"
                 android:background="@drawable/buttonshape"
-                android:id="@+id/addPhotoButton"/>
+                android:text="Add Photo"
+                android:textColor="@color/white" />
 
             <com.example.peppercontrol20.ConversationControl.MyListView
+                android:id="@+id/listViewPhoto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/white"
-                android:id="@+id/listViewPhoto"
 
                 />
 
             <ImageView
+                android:id="@+id/testImage"
                 android:layout_width="200dp"
-                android:layout_height="150dp"
-                android:id="@+id/testImage"/>
+                android:layout_height="150dp" />
         </LinearLayout>
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -249,8 +303,6 @@
             android:background="@drawable/buttonshape"
             android:id="@+id/save_popup"
             android:textColor="@color/white"/>
-
-
     </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>

@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.aldebaran.qi.Future;
 import com.aldebaran.qi.sdk.Qi;
 import com.aldebaran.qi.sdk.QiContext;
 import com.aldebaran.qi.sdk.QiSDK;
@@ -45,6 +47,8 @@ import com.aldebaran.qi.sdk.object.conversation.QiChatExecutor;
 import com.aldebaran.qi.sdk.object.conversation.QiChatbot;
 import com.aldebaran.qi.sdk.object.conversation.Say;
 import com.aldebaran.qi.sdk.object.conversation.Topic;
+import com.example.peppercontrol20.AppActivities.PhotoPresentation;
+import com.example.peppercontrol20.AppActivities.Proactive;
 import com.example.peppercontrol20.Controllers.ChatController;
 import com.example.peppercontrol20.ConversationControl.Conversation;
 import com.example.peppercontrol20.ConversationControl.ListenConv;
@@ -74,25 +78,31 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     private static final String TAG = "Chatbot" ;
 
     private String introduction;
-    private Say sayIntro;
+    private Say sayIntro, sayIntro2;
     private Chat chat;
     private ArrayList<ListenConv> listenConv;
     private ArrayList<SayConv> sayConv;
     private String activity;
+    private int isProactive;
+    private String proactiveEngagement;
 
     ArrayList<Conversation> conversations;
-
+    ArrayList<Conversation> proactiveConversations;
 
     private ListView listView;
     private ImageView wallpaper;
     public TextView txtView ;
     int event_id;
     SQLiteDatabaseHandler db; //Database
+    Handler handler;
+    Runnable r;
+    Thread thread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_pepper);
+        handler = new Handler();
         listView = (ListView) findViewById(R.id.list);
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -112,32 +122,68 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         mediaPlayerGuitar = MediaPlayer.create(this, R.raw.wholelottalove);
         mediaPlayerDisco = MediaPlayer.create(this, R.raw.disco);
 
+        thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    // TODO: OPEN NEW ACTIVITY?
+                    stopHandler();
+                    Intent i = new Intent(qiContext, Proactive.class);
+                    i.putExtra("OpenEventID", event_id);
+                    startActivity(i);
+
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         QiSDK.register(this, this);
-
-
 
     }
 
+    @Override
+    public void onUserInteraction() {
+        // TODO Auto-generated method stub
+        super.onUserInteraction();
+        stopHandler();//stop first and then start
 
+        startHandler();
+    }
+    public void stopHandler() {
+        Log.d("Handler","Stopped");
+        handler.removeCallbacks(thread);
+    }
+    public void startHandler() {
+        Log.d("Handler","Started");
+        handler.postDelayed(thread, 60000); //for 1 minute
+    }
 
     @Override
     public void onRobotFocusGained(QiContext qiContext) {
         //Get Intro
         this.qiContext = qiContext;
+        Log.d("I m activity", "1");
 
+
+        startHandler();
         //Init Introduction
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         introduction = sharedPreferences.getString("Intro","Γεια σου Άνθρωπε!");
-        Phrase introPhrase = new Phrase(introduction);
-        sayIntro = SayBuilder.with(qiContext)
-                .withPhrase(introPhrase)
-                .build();
-        sayIntro.run();
-
+        int flag = sharedPreferences.getInt("Flag",0);
+        if(flag == 0) {
+            editor.putInt("Flag", 1).apply();
+            Phrase introPhrase = new Phrase(introduction);
+            sayIntro = SayBuilder.with(qiContext)
+                    .withPhrase(introPhrase)
+                    .build();
+            sayIntro.run();
+        }
         //Init Conversations
         conversations = (ArrayList<Conversation>) db.getAllConversations(event_id);
-
+        proactiveConversations =  new ArrayList<Conversation>();
 
         String chatBot = "topic: ~chatbot()\n";
         int i = 0;
@@ -146,37 +192,39 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
             listenConv = conversation.getConversationListen();
             sayConv = conversation.getConversationSay();
             activity = conversation.getConversationActivity();
-            Log.d("Activity", activity);
-            //listen text
-            chatBot += "concept: (c_" + i + ") [";
-            for(int j = 0; j < listenConv.size(); j++) {
-                chatBot += "\"" + listenConv.get(j).listen + "\" ";
-            }
-            chatBot += "]\n";
-            //reply text
-            chatBot += "u: (~c_" + i + ") [";
-            for( int j = 0; j < sayConv.size(); j++) {
-                chatBot += "\"" + sayConv.get(j).say + "\" ";
-            }
-            chatBot += "] ";
-            //activity execute
-            String conversationID = Integer.toString(conversation.getId());
-            if(activity.equals("Video") || activity.equals("Photo")){
-                chatBot += "^execute(pepperActions, " + activity + ", "  + conversationID +")";
+            isProactive = conversation.getConversationProactive();
 
+            if(isProactive == 0) {
+                //listen text
+                chatBot += "concept: (c_" + i + ") [";
+                for (int j = 0; j < listenConv.size(); j++) {
+                    chatBot += "\"" + listenConv.get(j).listen + "\" ";
+                }
+                chatBot += "]\n";
+                //reply text
+                chatBot += "u: (~c_" + i + ") [";
+                for (int j = 0; j < sayConv.size(); j++) {
+                    chatBot += "\"" + sayConv.get(j).say + "\" ";
+                }
+                chatBot += "] ";
+                //activity execute
+                String conversationID = Integer.toString(conversation.getId());
+                if (activity.equals("Video") || activity.equals("Photo")) {
+                    chatBot += "^execute(pepperActions, " + activity + ", " + conversationID + ")";
+
+                } else {
+                    chatBot += "^execute(pepperActions, " + activity + ", " + Integer.toString(-1) + ")";
+                }
+                chatBot += "\n";
             }
             else{
-                chatBot += "^execute(pepperActions, " + activity +  ", " + Integer.toString(-1) + ")";
+
             }
-            chatBot += "\n";
-
-
-            Log.d("Chat",chatBot);
-
-
             // Create a qiChatbot
             i++;
         }
+        Log.d("Chat",chatBot);
+
         final Topic topic = TopicBuilder.with(qiContext)
                 .withText(chatBot)
                 .build();
@@ -189,18 +237,20 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         QiChatbot qiChatbot = QiChatbotBuilder.with(qiContext).withTopic(topic).build();
         chat = ChatBuilder.with(qiContext).withChatbot(qiChatbot).build();
         qiChatbot.setExecutors(executors);
+        Future<Void> fchat = chat.async().run();
 
-        chat.async().run();
-
-
+        // Stop the chat when the qichatbot is done
+        qiChatbot.addOnEndedListener(endReason -> {
+            Log.d(TAG, "Qichatbot end reason = " + endReason);
+            fchat.requestCancellation();
+        });
     }
 
     @Override
     public void onRobotFocusLost() {
         // Remove the listeners from the Chat action.
-        if (chat != null) {
-            chat.removeAllOnStartedListeners();
-        }
+        //QiSDK.unregister(this, this);
+        stopHandler();
     }
 
     @Override
@@ -209,11 +259,14 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     }
 
 
-
     @Override
     protected void onDestroy() {
         // Unregister the RobotLifecycleCallbacks for this Activity.
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("Flag", 0).apply();
         QiSDK.unregister(this, this);
+        stopHandler();
         super.onDestroy();
     }
 
@@ -237,7 +290,44 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         }
 
     }
-    private void doAction(QiContext qiContext, String action, String conversationID) {
+
+    private void setStatus(String s) {
+        status.setText(s);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onRestoreInstanceState(savedInstanceState);
+        status.setText(savedInstanceState.getString("CONNECT"));
+        //chatAdapter.notifyDataSetChanged();
+
+    }
+
+    @Override
+    public void onStart() {
+
+        super.onStart();
+
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+
+    public void doAction(QiContext qiContext, String action, String conversationID) {
         // Create an animation.
         Log.d("Action", action);
         if (action.equals("Disco")){
@@ -252,10 +342,8 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         else if(action.equals("Photo")){
             playPhotos(qiContext, Integer.parseInt(conversationID));
         }
-
-
-
     }
+
     public  void playVideo(QiContext qiContext, int conversationID){
         Log.d("Window","Opening Window: " + Integer.toString(conversationID));
         ArrayList<VideoConv> videos = db.getVideos(conversationID);
@@ -306,7 +394,7 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
                 .build(); // Build the animation.
 
         // Create an animate action.
-        animate = AnimateBuilder.with(qiContext) // Create the builder with the context.
+        Animate animate = AnimateBuilder.with(qiContext) // Create the builder with the context.
                 .withAnimation(animation) // Set the animation.
                 .build(); // Build the animate action.
 
@@ -325,7 +413,7 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
                 .build(); // Build the animation.
 
         // Create an animate action.
-        animate = AnimateBuilder.with(qiContext) // Create the builder with the context.
+        Animate animate = AnimateBuilder.with(qiContext) // Create the builder with the context.
                 .withAnimation(animation) // Set the animation.
                 .build(); // Build the animate action.
 
@@ -333,43 +421,6 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         animate.addOnStartedListener(() -> mediaPlayerDisco.start());
 
         animate.run();
-    }
-
-    private void setStatus(String s) {
-        status.setText(s);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-
-        // Always call the superclass so it can save the view hierarchy state
-        super.onSaveInstanceState(outState);
-
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-
-        // Always call the superclass so it can save the view hierarchy state
-        super.onRestoreInstanceState(savedInstanceState);
-        status.setText(savedInstanceState.getString("CONNECT"));
-        //chatAdapter.notifyDataSetChanged();
-
-    }
-
-    @Override
-    public void onStart() {
-
-        super.onStart();
-
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-
     }
 
 

@@ -3,29 +3,22 @@ package com.example.peppercontrol20;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Icon;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.peppercontrol20.AppActivities.MainActivity;
-import com.example.peppercontrol20.AppActivities.PepperActivity;
 import com.example.peppercontrol20.AppActivities.StartPepper;
-import com.example.peppercontrol20.ConversationControl.AdminPanel;
+import com.example.peppercontrol20.AppActivities.AdminPanel;
 import com.example.peppercontrol20.ConversationControl.Event;
 import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import in.myinnos.library.AppIconNameChanger;
 
 public class IntroChoise extends AppCompatActivity {
     Button pepperButton;
@@ -50,7 +43,7 @@ public class IntroChoise extends AppCompatActivity {
         if(locked == 0){
             adminButton.setBackgroundResource(R.drawable.unlock);
             ViewGroup.LayoutParams params = adminButton.getLayoutParams();
-            params.width = 40;
+            params.width = 43;
             adminButton.setLayoutParams(params);
         }
         pepperButton.setOnClickListener(new View.OnClickListener() {
@@ -59,21 +52,6 @@ public class IntroChoise extends AppCompatActivity {
                 Intent intent;
                 String eventName = db.getEventNameByID(eventID);
                 if(locked == 1){
-                    // Change app Icon and name
-                    // Active alias name
-                    String activeName = eventName;
-
-                    // Disable alias names
-                    List<String> disableNames = new ArrayList<String>();
-                    disableNames.add(".IntroChoise");
-
-                    // Initiate App Icon Name Changer
-                    new AppIconNameChanger.Builder(IntroChoise.this)
-                            .activeName(activeName) // String
-                            .disableNames(disableNames) // List<String>
-                            .packageName(BuildConfig.APPLICATION_ID)
-                            .build()
-                            .setNow();
                     intent = new Intent(IntroChoise.this, StartPepper.class);
                     events = db.getAllEvents();
                     if(events.size() !=0) {
@@ -133,7 +111,7 @@ public class IntroChoise extends AppCompatActivity {
 
                                 adminButton.setBackgroundResource(R.drawable.unlock);
                                 ViewGroup.LayoutParams params = adminButton.getLayoutParams();
-                                params.width = 40;
+                                params.width = 43;
                                 adminButton.setLayoutParams(params);
                                 locked = 0;
                                 editor.putInt("Admin lock", 0).apply();
