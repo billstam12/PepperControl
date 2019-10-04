@@ -36,15 +36,6 @@
             android:text="Not Connected" />
 
         <Button
-            android:id="@+id/btn_connect"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:background="@drawable/buttonshape"
-            android:text="Connect" />
-        <Button
             android:id="@+id/btn_setup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

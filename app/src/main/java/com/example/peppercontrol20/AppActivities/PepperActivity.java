@@ -13,6 +13,7 @@ import android.os.Message;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -38,7 +39,6 @@ public class PepperActivity extends AppCompatActivity {
     private TextView eventName;
     private Dialog dialog;
     private TextInputLayout inputLayout;
-    private ArrayAdapter<String> chatAdapter;
     private ArrayList<String> chatMessages;
     private BluetoothAdapter bluetoothAdapter;
 
@@ -61,18 +61,35 @@ public class PepperActivity extends AppCompatActivity {
     private String mUser;
     int event_id;
     SQLiteDatabaseHandler db;
-    /*
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(true);
-    }
 
-    */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pepper);
 
+
+        findViewsByIds();
+
+        // If we have a saved state then we can restore it now
+
+        if (savedInstanceState != null) {
+            Log.d("Status", savedInstanceState.getString("CONNECT"));
+            // Restore value of members from saved state
+            status.setText(savedInstanceState.getString("CONNECT"));
+        }
+        else {
+            // Probably initialize members with default values for a new instance
+
+        }
+        // REQUIRE BLUETOOTH
+        //check device support bluetooth or not
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, "Bluetooth is not available!", Toast.LENGTH_SHORT).show();
+            finish();
+        }
         Intent startIntent = getIntent();
         db = new SQLiteDatabaseHandler(this);
 
@@ -80,43 +97,7 @@ public class PepperActivity extends AppCompatActivity {
         String name = db.getEventNameByID(event_id);
         eventName = findViewById(R.id.event_name);
         eventName.setText(name);
-        findViewsByIds();
-        /*
-        if (savedInstanceState != null) {
-            // Restore value of members from saved state
-            status.setText(savedInstanceState.getString("CONNECT"));
-            chatMessages = (ArrayList<String>) savedInstanceState.getSerializable("LIST");
-            //Update UI
-            chatAdapter.notifyDataSetChanged();
-        }
-        else {
-            // Probably initialize members with default values for a new instance
-            status.setText("Not connected!");
-            chatMessages = new ArrayList<>();
-            chatAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, chatMessages);
-            //set chat adapter
-            listView.setAdapter(chatAdapter);
-        }
 
-        // REQUIRE BLUETOOTH
-
-        //check device support bluetooth or not
-
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        /*
-        if (bluetoothAdapter == null) {
-            Toast.makeText(this, "Bluetooth is not available!", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-        */
-
-        //show bluetooth devices dialog when click connect button
-        btnConnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //showPrinterPickDialog();
-            }
-        });
         btnSetup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -141,45 +122,34 @@ public class PepperActivity extends AppCompatActivity {
 
         @Override
         public boolean handleMessage(Message msg) {
+            Log.d("Handler message", msg.toString());
 
             switch (msg.what) {
-
                 case MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case ChatController.STATE_CONNECTED:
                             setStatus("Connected to: " + connectingDevice.getName());
-                            btnConnect.setEnabled(false);
                             break;
                         case ChatController.STATE_CONNECTING:
                             setStatus("Connecting...");
-                            btnConnect.setEnabled(false);
                             break;
                         case ChatController.STATE_LISTEN:
                         case ChatController.STATE_NONE:
                             setStatus("Not connected");
-                            btnConnect.setEnabled(true);
                             break;
                     }
                     break;
-                case MESSAGE_WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-
-                    String writeMessage = new String(writeBuf);
-                    chatMessages.add("Me: " + writeMessage);
-                    chatAdapter.notifyDataSetChanged();
-                    break;
                 case MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
-
                     String readMessage = new String(readBuf, 0, msg.arg1);
-                    chatMessages.add(connectingDevice.getName() + ":  " + readMessage);
-                    chatAdapter.notifyDataSetChanged();
-
+                    Log.d("Received",readMessage);
                     break;
                 case MESSAGE_DEVICE_OBJECT:
                     connectingDevice = msg.getData().getParcelable(DEVICE_OBJECT);
+                    setStatus("Connected to: " + connectingDevice.getName());
                     Toast.makeText(getApplicationContext(), "Connected to " + connectingDevice.getName(),
                             Toast.LENGTH_SHORT).show();
+
                     break;
                 case MESSAGE_TOAST:
                     Toast.makeText(getApplicationContext(), msg.getData().getString("toast"),
@@ -190,98 +160,43 @@ public class PepperActivity extends AppCompatActivity {
         }
     });
 
-    private void showPrinterPickDialog() {
-        dialog = new Dialog(this);
-        dialog.setContentView(R.layout.layout_bluetooth);
-        dialog.setTitle("Bluetooth Devices");
-
-        if (bluetoothAdapter.isDiscovering()) {
-            bluetoothAdapter.cancelDiscovery();
-        }
-        bluetoothAdapter.startDiscovery();
-
-        //Initializing bluetooth adapters
-        ArrayAdapter<String> pairedDevicesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        discoveredDevicesAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-
-        //locate listviews and attatch the adapters
-        ListView listView = (ListView) dialog.findViewById(R.id.pairedDeviceList);
-        ListView listView2 = (ListView) dialog.findViewById(R.id.discoveredDeviceList);
-        listView.setAdapter(pairedDevicesAdapter);
-        listView2.setAdapter(discoveredDevicesAdapter);
-
-        // Register for broadcasts when a device is discovered
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(discoveryFinishReceiver, filter);
-
-        // Register for broadcasts when discovery has finished
-        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        registerReceiver(discoveryFinishReceiver, filter);
-
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-
-        // If there are paired devices, add each one to the ArrayAdapter
-        if (pairedDevices.size() > 0) {
-            for (BluetoothDevice device : pairedDevices) {
-                pairedDevicesAdapter.add(device.getName() + "\n" + device.getAddress());
-            }
-        } else {
-            pairedDevicesAdapter.add(getString(R.string.none_paired));
-        }
-
-        //Handling listview item click event
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                bluetoothAdapter.cancelDiscovery();
-                String info = ((TextView) view).getText().toString();
-                String address = info.substring(info.length() - 17);
-
-                connectToDevice(address);
-                dialog.dismiss();
-            }
-
-        });
-
-        listView2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                bluetoothAdapter.cancelDiscovery();
-                String info = ((TextView) view).getText().toString();
-                String address = info.substring(info.length() - 17);
-
-                connectToDevice(address);
-                dialog.dismiss();
-            }
-        });
-
-        dialog.findViewById(R.id.cancelButton).setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-        dialog.setCancelable(false);
-        dialog.show();
-    }
-
     private void setStatus(String s) {
         status.setText(s);
     }
 
-    private void connectToDevice(String deviceAddress) {
-        bluetoothAdapter.cancelDiscovery();
-        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
-        chatController.connect(device);
+
+    private void findViewsByIds() {
+        status = (TextView) findViewById(R.id.status);
+        btnConnect = (Button) findViewById(R.id.btn_connect);
+        listView = (ListView) findViewById(R.id.list);
+        btnStart = findViewById(R.id.btn_start);
+        btnSetup = findViewById(R.id.btn_setup);
     }
-    private static final String STATE_ITEMS = "Chat";
 
-    // Make sure to declare as ArrayList so it's Serializable
-    private ArrayList<ChatController> mItems;
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_ENABLE_BLUETOOTH:
+                if (resultCode == Activity.RESULT_OK) {
+                    chatController = ChatController.getInstance(handler);
+                } else {
+                    Toast.makeText(this, "Bluetooth still disabled, turn off application!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+        }
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BLUETOOTH);
+        } else {
+            chatController = ChatController.getInstance(handler);
+
+        }
+    }
 
 
     @Override
@@ -299,57 +214,8 @@ public class PepperActivity extends AppCompatActivity {
         // Always call the superclass so it can save the view hierarchy state
         super.onRestoreInstanceState(savedInstanceState);
         status.setText(savedInstanceState.getString("CONNECT"));
-        chatMessages = (ArrayList<String>) savedInstanceState.getSerializable("LIST");
-        //chatAdapter.notifyDataSetChanged();
 
     }
-
-
-    private void findViewsByIds() {
-        status = (TextView) findViewById(R.id.status);
-        btnConnect = (Button) findViewById(R.id.btn_connect);
-        listView = (ListView) findViewById(R.id.list);
-        btnStart = findViewById(R.id.btn_start);
-        btnSetup = findViewById(R.id.btn_setup);
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_ENABLE_BLUETOOTH:
-                if (resultCode == Activity.RESULT_OK) {
-                    chatController =  ChatController.getInstance(handler);
-                    Toast.makeText(this, "Bluetooth still disabled, turn off application!", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-        }
-    }
-
-    private void sendMessage(String message) {
-        if (chatController.getState() != ChatController.STATE_CONNECTED) {
-            Toast.makeText(this, "Connection was lost!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (message.length() > 0) {
-            byte[] send = message.getBytes();
-            chatController.write(send);
-        }
-    }
-
-    @Override
-    public void onStart() {
-
-        super.onStart();
-        /*
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableIntent, REQUEST_ENABLE_BLUETOOTH);
-        } else {
-            chatController =  ChatController.getInstance(handler);
-        }
-        */
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -360,14 +226,14 @@ public class PepperActivity extends AppCompatActivity {
                 chatController.start();
             }
         }
+        else {
+            chatController =  ChatController.getInstance(handler);
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (chatController != null) {
-            chatController.stop();
-        }
     }
 
     private final BroadcastReceiver discoveryFinishReceiver = new BroadcastReceiver() {
@@ -387,7 +253,5 @@ public class PepperActivity extends AppCompatActivity {
             }
         }
     };
-
-
 
 }

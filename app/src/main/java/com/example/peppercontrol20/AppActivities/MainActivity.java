@@ -13,6 +13,7 @@ import android.os.Message;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -73,10 +74,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             // Restore value of members from saved state
+            Log.d("Status", savedInstanceState.getString("CONNECT"));
+
             status.setText(savedInstanceState.getString("CONNECT"));
             chatMessages = (ArrayList<String>) savedInstanceState.getSerializable("LIST");
             //Update UI
-            //chatAdapter.notifyDataSetChanged();
+            chatAdapter.notifyDataSetChanged();
         }
         else {
             // Probably initialize members with default values for a new instance
@@ -88,14 +91,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //check device support bluetooth or not
-        /*
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
             Toast.makeText(this, "Bluetooth is not available!", Toast.LENGTH_SHORT).show();
             finish();
         }
-        */
+
 
         //show bluetooth devices dialog when click connect button
         btnConnect.setOnClickListener(new View.OnClickListener() {
@@ -344,17 +346,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (chatController != null) {
             if (chatController.getState() == ChatController.STATE_NONE) {
+                chatController = ChatController.getInstance(handler);
                 chatController.start();
             }
+        }
+        else {
+            chatController =  ChatController.getInstance(handler);
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (chatController != null) {
-            //chatController.stop();
-        }
     }
 
     private final BroadcastReceiver discoveryFinishReceiver = new BroadcastReceiver() {

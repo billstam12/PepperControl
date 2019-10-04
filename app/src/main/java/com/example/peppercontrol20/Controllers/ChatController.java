@@ -1,31 +1,37 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+        * Copyright (C) 2009 The Android Open Source Project
+        *
+        * Licensed under the Apache License, Version 2.0 (the "License");
+        * you may not use this file except in compliance with the License.
+        * You may obtain a copy of the License at
+        *
+        *      http://www.apache.org/licenses/LICENSE-2.0
+        *
+        * Unless required by applicable law or agreed to in writing, software
+        * distributed under the License is distributed on an "AS IS" BASIS,
+        * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        * See the License for the specific language governing permissions and
+        * limitations under the License.
+        */
 
-package com.example.peppercontrol20.Controllers;
+        package com.example.peppercontrol20.Controllers;
 
 import android.app.Application;
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.support.annotation.Nullable;
 
 import com.example.peppercontrol20.AppActivities.MainActivity;
+import com.example.peppercontrol20.Services.BluetoothService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +39,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class ChatController  extends Application implements Serializable{
+public class ChatController  extends Service implements Serializable{
     private static final String APP_NAME = "Pepper Control 2.0";
     private static final UUID MY_UUID = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
@@ -203,6 +209,20 @@ public class ChatController  extends Application implements Serializable{
 
         // Start the service over to restart listening mode
         ChatController.this.start();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+    private final IBinder mBinder = new LocalBinder();
+
+    public class LocalBinder extends Binder {
+        ChatController getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return ChatController.this;
+        }
     }
 
     // runs while listening for incoming connections

@@ -8,6 +8,9 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
+    <uses-sdk
+        tools:overrideLibrary="com.aldebaran.qi.sdk.design, com.aldebaran.qi.sdk, com.aldebaran.qi.sdk.core, com.aldebaran.robotservice.lib"
+    />
     <uses-feature android:name="com.softbank.hardware.pepper" />
 
     <application
@@ -18,8 +21,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".AppActivities.Proactive"  android:theme="@style/Theme.Transparent"></activity>
+        <activity
+            android:name=".AppActivities.Proactive"
+            android:theme="@style/Theme.Transparent" />
         <activity android:name=".AppActivities.AdminPanel" />
         <activity android:name=".AppActivities.PhotoPresentation" />
         <activity android:name=".AppActivities.StartPepper" />
