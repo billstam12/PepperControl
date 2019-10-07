@@ -76,7 +76,7 @@ android:padding="16dp">
     android:layout_gravity="left"
     android:padding="10dp"
     android:layout_below="@+id/textView_strength_right"
-    android:text="x050:x050"/>
+    android:text="x050:y050"/>
     <TextView
         android:id="@+id/status"
         android:layout_width="match_parent"

@@ -44,7 +44,7 @@ public class ChatController  extends Service implements Serializable{
     private static final UUID MY_UUID = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
 
     private final BluetoothAdapter bluetoothAdapter;
-    private final Handler handler;
+    private Handler handler;
     private AcceptThread acceptThread;
     private ConnectThread connectThread;
     private ReadWriteThread connectedThread;
@@ -64,7 +64,7 @@ public class ChatController  extends Service implements Serializable{
         return (INSTANCE);
     }
 
-    private ChatController(Handler handler) {
+    public ChatController(Handler handler) {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         state = STATE_NONE;
 
@@ -84,6 +84,8 @@ public class ChatController  extends Service implements Serializable{
     }
 
     public synchronized Handler getHandler() { return handler; }
+
+    public synchronized void setHandler(Handler handler) { this.handler =  handler; }
     // start service
     public synchronized void start() {
         // Cancel any thread
