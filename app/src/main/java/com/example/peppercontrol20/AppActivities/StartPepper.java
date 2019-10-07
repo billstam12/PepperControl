@@ -1,31 +1,26 @@
 package com.example.peppercontrol20.AppActivities;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.MediaController;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.aldebaran.qi.Future;
-import com.aldebaran.qi.sdk.Qi;
 import com.aldebaran.qi.sdk.QiContext;
 import com.aldebaran.qi.sdk.QiSDK;
 import com.aldebaran.qi.sdk.RobotLifecycleCallbacks;
@@ -35,20 +30,15 @@ import com.aldebaran.qi.sdk.builder.ChatBuilder;
 import com.aldebaran.qi.sdk.builder.QiChatbotBuilder;
 import com.aldebaran.qi.sdk.builder.SayBuilder;
 import com.aldebaran.qi.sdk.builder.TopicBuilder;
-import com.aldebaran.qi.sdk.design.activity.RobotActivity;
 import com.aldebaran.qi.sdk.object.actuation.Animate;
 import com.aldebaran.qi.sdk.object.actuation.Animation;
 import com.aldebaran.qi.sdk.object.conversation.BaseQiChatExecutor;
 import com.aldebaran.qi.sdk.object.conversation.Chat;
-import com.aldebaran.qi.sdk.object.conversation.Listen;
 import com.aldebaran.qi.sdk.object.conversation.Phrase;
-import com.aldebaran.qi.sdk.object.conversation.PhraseSet;
 import com.aldebaran.qi.sdk.object.conversation.QiChatExecutor;
 import com.aldebaran.qi.sdk.object.conversation.QiChatbot;
 import com.aldebaran.qi.sdk.object.conversation.Say;
 import com.aldebaran.qi.sdk.object.conversation.Topic;
-import com.example.peppercontrol20.AppActivities.PhotoPresentation;
-import com.example.peppercontrol20.AppActivities.Proactive;
 import com.example.peppercontrol20.Controllers.ChatController;
 import com.example.peppercontrol20.ConversationControl.Conversation;
 import com.example.peppercontrol20.ConversationControl.ListenConv;
@@ -98,18 +88,75 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     Runnable r;
     Thread thread;
 
+    public static final int MESSAGE_STATE_CHANGE = 1;
+    public static final int MESSAGE_READ = 2;
+    public static final int MESSAGE_WRITE = 3;
+    public static final int MESSAGE_DEVICE_OBJECT = 4;
+    public static final int MESSAGE_TOAST = 5;
+    public static final String DEVICE_OBJECT = "Robot";
+
+    private static final int REQUEST_ENABLE_BLUETOOTH = 1;
+    private ChatController chatController;
+    private BluetoothDevice connectingDevice;
+    private ArrayAdapter<String> discoveredDevicesAdapter;
+    private BluetoothAdapter bluetoothAdapter;
+
+    private Handler chatHandler = new Handler(new Handler.Callback() {
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            Log.d("Message", Integer.toString(msg.what));
+            switch (msg.what) {
+
+                case MESSAGE_STATE_CHANGE:
+                    Log.d("Message2", Integer.toString(msg.arg1));
+
+
+                    break;
+                case MESSAGE_WRITE:
+                    byte[] writeBuf = (byte[]) msg.obj;
+                    String writeMessage = new String(writeBuf);
+
+                    break;
+                case MESSAGE_READ:
+                    byte[] readBuf = (byte[]) msg.obj;
+                    String readMessage = new String(readBuf, 0, msg.arg1);
+
+
+                    break;
+                case MESSAGE_DEVICE_OBJECT:
+                    connectingDevice = msg.getData().getParcelable(DEVICE_OBJECT);
+                    Toast.makeText(getApplicationContext(), "Connected to " + connectingDevice.getName(),
+                            Toast.LENGTH_SHORT).show();
+                    break;
+                case MESSAGE_TOAST:
+                    Toast.makeText(getApplicationContext(), msg.getData().getString("toast"),
+                            Toast.LENGTH_SHORT).show();
+                    break;
+            }
+            return false;
+        }
+    });
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start_pepper);
+        // REQUIRE BLUETOOTH
+        //check device support bluetooth or not
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, "Bluetooth is not available!", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
         handler = new Handler();
-        listView = (ListView) findViewById(R.id.list);
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         final SharedPreferences.Editor editor = sharedPreferences.edit();
 
         Intent startIntent = getIntent();
         event_id = startIntent.getIntExtra("OpenEventID", -1);
+        Log.d("Opened Event", Integer.toString(event_id));
         db = new SQLiteDatabaseHandler(this);
         wallpaper = findViewById(R.id.eventWallpaper);
 
@@ -121,7 +168,7 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         status = findViewById(R.id.status);
         mediaPlayerGuitar = MediaPlayer.create(this, R.raw.wholelottalove);
         mediaPlayerDisco = MediaPlayer.create(this, R.raw.disco);
-
+        chatController =  ChatController.getInstance(chatHandler);
         thread = new Thread(new Runnable() {
 
             @Override
@@ -258,18 +305,51 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
         // Nothing here.
     }
 
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_ENABLE_BLUETOOTH:
+                if (resultCode == Activity.RESULT_OK) {
+                    chatController =  ChatController.getInstance(chatHandler);
+                    Toast.makeText(this, "Bluetooth still disabled, turn off application!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+        }
+    }
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
+
         // Unregister the RobotLifecycleCallbacks for this Activity.
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("Flag", 0).apply();
         QiSDK.unregister(this, this);
         stopHandler();
-        super.onDestroy();
+
+        if (chatController != null) {
+            chatController.stop();
+            chatHandler.removeCallbacksAndMessages(null);
+        }
     }
 
+    @Override
+    protected  void onPause(){
+        super.onPause();
+        Log.d("Paused", "StartPepper");
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("Flag", 0).apply();
+        QiSDK.unregister(this, this);
+        stopHandler();
+
+        if (chatController != null) {
+            chatController.stop();
+            //chatHandler.removeCallbacksAndMessages(null);
+            chatHandler.removeCallbacks(null);
+
+        }
+    }
     class MyQiChatExecutor extends BaseQiChatExecutor {
         private final QiContext qiContext;
         MyQiChatExecutor(QiContext context) {
@@ -317,6 +397,12 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     public void onStart() {
 
         super.onStart();
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BLUETOOTH);
+        } else {
+            chatController =  ChatController.getInstance(chatHandler);
+        }
 
 
     }
@@ -324,7 +410,42 @@ public class StartPepper  extends Activity implements RobotLifecycleCallbacks {
     @Override
     public void onResume() {
         super.onResume();
+        if (chatController != null) {
+            if (chatController.getState() == ChatController.STATE_NONE) {
+                //chatController = ChatController.getInstance(chatHandler);
+                chatController.start();
+                chatController.setHandler(chatHandler);
+            }
+            else{
+                chatController = ChatController.getInstance(chatHandler);
+                chatController.start();
+                chatController.setHandler(chatHandler);
+
+            }
+        }
+        else{
+            //chatController = new ChatController(chatHandler);
+        }
     }
+
+
+    private final BroadcastReceiver discoveryFinishReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    discoveredDevicesAdapter.add(device.getName() + "\n" + device.getAddress());
+                }
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                if (discoveredDevicesAdapter.getCount() == 0) {
+                    discoveredDevicesAdapter.add(getString(R.string.none_found));
+                }
+            }
+        }
+    };
 
 
     public void doAction(QiContext qiContext, String action, String conversationID) {

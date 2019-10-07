@@ -1,6 +1,6 @@
 package com.example.peppercontrol20.AppActivities;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -9,10 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
-import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -23,29 +24,30 @@ import android.widget.Toast;
 
 import com.example.peppercontrol20.Controllers.ChatController;
 import com.example.peppercontrol20.R;
-import com.example.peppercontrol20.Controllers.RobotController;
 
-import java.util.ArrayList;
 import java.util.Set;
+
+import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView status;
-    private Button btnConnect;
-    private ListView listView;
+    static TextView status;
+    static Button btnConnect;
+    static ListView listView;
     private Dialog dialog;
-    private TextInputLayout inputLayout;
-    private ArrayAdapter<String> chatAdapter;
-    private ArrayList<String> chatMessages;
-    private BluetoothAdapter bluetoothAdapter;
-
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
     public static final int MESSAGE_DEVICE_OBJECT = 4;
     public static final int MESSAGE_TOAST = 5;
     public static final String DEVICE_OBJECT = "Robot";
+    private BluetoothAdapter bluetoothAdapter;
+    private TextView mTextViewAngleLeft;
+    private TextView mTextViewStrengthLeft;
 
+    private TextView mTextViewAngleRight;
+    private TextView mTextViewStrengthRight;
+    private TextView mTextViewCoordinateRight;
     private static final int REQUEST_ENABLE_BLUETOOTH = 1;
     private ChatController chatController;
     private BluetoothDevice connectingDevice;
@@ -56,46 +58,106 @@ public class MainActivity extends AppCompatActivity {
     // Make sure to declare as ArrayList so it's Serializable
     static final String STATE_USER = "user";
     private String mUser;
-
-
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(true);
-    }
-
+    Handler handler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
         findViewsByIds();
-        // If we have a saved state then we can restore it now
+        final JoystickView joystickRight = (JoystickView) findViewById(R.id.joystickView_right);
+
 
         if (savedInstanceState != null) {
             // Restore value of members from saved state
             status.setText(savedInstanceState.getString("CONNECT"));
-            chatMessages = (ArrayList<String>) savedInstanceState.getSerializable("LIST");
-            //Update UI
-            //chatAdapter.notifyDataSetChanged();
-        }
-        else {
-            // Probably initialize members with default values for a new instance
-
-            chatMessages = new ArrayList<>();
-            chatAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, chatMessages);
-            //set chat adapter
-            listView.setAdapter(chatAdapter);
         }
 
+        // REQUIRE BLUETOOTH
         //check device support bluetooth or not
-        /*
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter == null) {
             Toast.makeText(this, "Bluetooth is not available!", Toast.LENGTH_SHORT).show();
             finish();
         }
-        */
+
+        if (savedInstanceState != null) {
+            // Restore value of members from saved state
+            status.setText(savedInstanceState.getString("CONNECT"));
+
+        }
+        else {
+            // Probably initialize members with default values for a new instance
+
+        }
+
+
+        joystickRight.setOnMoveListener(new JoystickView.OnMoveListener() {
+            @SuppressLint("DefaultLocale")
+            @Override
+            public void onMove(int angle, int strength) {
+                mTextViewAngleRight.setText(angle + "°");
+                mTextViewStrengthRight.setText(strength + "%");
+                mTextViewCoordinateRight.setText(
+                        String.format("X%03d:Y%03d",
+                                joystickRight.getNormalizedX(),
+                                joystickRight.getNormalizedY())
+                );
+                sendMessage(String.format("%03d.%03d.%03d.%03d",
+                        angle,
+                        strength,
+                        joystickRight.getNormalizedX(),
+                        joystickRight.getNormalizedY()));
+            }
+        });
+        handler = new Handler(Looper.getMainLooper()){
+
+            @Override
+            public void handleMessage(Message msg) {
+                Log.d("Message", Integer.toString(msg.what));
+
+                switch (msg.what) {
+
+                    case MESSAGE_STATE_CHANGE:
+                        Log.d("Message2", Integer.toString(msg.arg1));
+
+                        switch (msg.arg1) {
+                            case ChatController.STATE_CONNECTED:
+                                setStatus("Connected to: " + connectingDevice.getName());
+                                btnConnect.setEnabled(false);
+                                break;
+                            case ChatController.STATE_CONNECTING:
+                                setStatus("Connecting...");
+                                btnConnect.setEnabled(false);
+                                break;
+                            case ChatController.STATE_LISTEN:
+                            case ChatController.STATE_NONE:
+                                setStatus("Not connected");
+                                btnConnect.setEnabled(true);
+                                break;
+                        }
+                        break;
+                    case MESSAGE_WRITE:
+                        byte[] writeBuf = (byte[]) msg.obj;
+                        String writeMessage = new String(writeBuf);
+                        break;
+                    case MESSAGE_READ:
+                        byte[] readBuf = (byte[]) msg.obj;
+                        String readMessage = new String(readBuf, 0, msg.arg1);
+                        break;
+                    case MESSAGE_DEVICE_OBJECT:
+                        connectingDevice = msg.getData().getParcelable(DEVICE_OBJECT);
+                        Toast.makeText(getApplicationContext(), "Connected to " + connectingDevice.getName(),
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                    case MESSAGE_TOAST:
+                        Toast.makeText(getApplicationContext(), msg.getData().getString("toast"),
+                                Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        };
 
         //show bluetooth devices dialog when click connect button
         btnConnect.setOnClickListener(new View.OnClickListener() {
@@ -104,57 +166,26 @@ public class MainActivity extends AppCompatActivity {
                 showPrinterPickDialog();
             }
         });
+
+
+
     }
 
-    private Handler handler = new Handler(new Handler.Callback() {
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            switch (msg.what) {
-                case MESSAGE_STATE_CHANGE:
-                    switch (msg.arg1) {
-                        case ChatController.STATE_CONNECTED:
-                            setStatus("Connected to: " + connectingDevice.getName());
-                            btnConnect.setEnabled(false);
-                            break;
-                        case ChatController.STATE_CONNECTING:
-                            setStatus("Connecting...");
-                            btnConnect.setEnabled(false);
-                            break;
-                        case ChatController.STATE_LISTEN:
-                        case ChatController.STATE_NONE:
-                            setStatus("Not connected");
-                            btnConnect.setEnabled(true);
-                            break;
-                    }
-                    break;
-                case MESSAGE_WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-
-                    String writeMessage = new String(writeBuf);
-                    chatMessages.add("Me: " + writeMessage);
-                    chatAdapter.notifyDataSetChanged();
-                    break;
-                case MESSAGE_READ:
-                    byte[] readBuf = (byte[]) msg.obj;
-
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-                    chatMessages.add(connectingDevice.getName() + ":  " + readMessage);
-                    chatAdapter.notifyDataSetChanged();
-                    break;
-                case MESSAGE_DEVICE_OBJECT:
-                    connectingDevice = msg.getData().getParcelable(DEVICE_OBJECT);
-                    Toast.makeText(getApplicationContext(), "Connected to " + connectingDevice.getName(),
-                            Toast.LENGTH_SHORT).show();
-                    break;
-                case MESSAGE_TOAST:
-                    Toast.makeText(getApplicationContext(), msg.getData().getString("toast"),
-                            Toast.LENGTH_SHORT).show();
-                    break;
-            }
-            return false;
+    private void sendMessage(String message) {
+        if (chatController.getState() != ChatController.STATE_CONNECTED) {
+            Toast.makeText(this, "Connection was lost!", Toast.LENGTH_SHORT).show();
+            return;
         }
-    });
+
+        if (message.length() > 0) {
+            byte[] send = message.getBytes();
+            chatController.write(send);
+        }
+    }
+
+
+
+
 
     private void showPrinterPickDialog() {
         dialog = new Dialog(this);
@@ -235,6 +266,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setStatus(String s) {
+        Log.d("Setting", s);
         status.setText(s);
     }
 
@@ -247,74 +279,26 @@ public class MainActivity extends AppCompatActivity {
     private void findViewsByIds() {
         status = (TextView) findViewById(R.id.status);
         btnConnect = (Button) findViewById(R.id.btn_connect);
-        listView = (ListView) findViewById(R.id.list);
-        inputLayout = (TextInputLayout) findViewById(R.id.input_layout);
-        View btnSend = findViewById(R.id.btn_send);
-        View btnControl = findViewById(R.id.btn_control);
-
-        btnSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (inputLayout.getEditText().getText().toString().equals("")) {
-                    Toast.makeText(MainActivity.this, "Please input some texts", Toast.LENGTH_SHORT).show();
-                } else {
-                    //TODO: here
-
-                    sendMessage(inputLayout.getEditText().getText().toString());
-                    inputLayout.getEditText().setText("");
-                }
-            }
-        });
+        mTextViewAngleRight = (TextView) findViewById(R.id.textView_angle_right);
+        mTextViewStrengthRight = (TextView) findViewById(R.id.textView_strength_right);
+        mTextViewCoordinateRight = findViewById(R.id.textView_coordinate_right);
 
 
-
-        btnControl.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent startControl = new Intent(MainActivity.this, RobotController.class);
-                startControl.putExtra("connectionTest", status.getText().toString());
-                startActivity(startControl);
-
-            }
-        });
-
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_ENABLE_BLUETOOTH:
-                if (resultCode == Activity.RESULT_OK) {
-                    chatController = ChatController.getInstance(handler);
-                } else {
-                    Toast.makeText(this, "Bluetooth still disabled, turn off application!", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-        }
-    }
-
-    private void sendMessage(String message) {
-        if (chatController.getState() != ChatController.STATE_CONNECTED) {
-            Toast.makeText(this, "Connection was lost!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (message.length() > 0) {
-            byte[] send = message.getBytes();
-            chatController.write(send);
-        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
 
+
         if (!bluetoothAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BLUETOOTH);
         } else {
-            chatController = ChatController.getInstance(handler);
-
+            chatController =  ChatController.getInstance(handler);
         }
+
+
     }
 
 
@@ -324,7 +308,6 @@ public class MainActivity extends AppCompatActivity {
         // Always call the superclass so it can save the view hierarchy state
         super.onSaveInstanceState(outState);
         outState.putString("CONNECT", status.getText().toString());
-        outState.putSerializable("LIST", chatMessages);
     }
 
     @Override
@@ -333,19 +316,15 @@ public class MainActivity extends AppCompatActivity {
         // Always call the superclass so it can save the view hierarchy state
         super.onRestoreInstanceState(savedInstanceState);
         status.setText(savedInstanceState.getString("CONNECT"));
-        chatMessages = (ArrayList<String>) savedInstanceState.getSerializable("LIST");
-        //Update UI
-        chatAdapter.notifyDataSetChanged();
 
     }
     @Override
     public void onResume() {
         super.onResume();
-
         if (chatController != null) {
-            if (chatController.getState() == ChatController.STATE_NONE) {
-                chatController.start();
-            }
+            chatController = ChatController.getInstance(handler);
+            chatController.start();
+            chatController.setHandler(handler);
         }
     }
 
@@ -353,7 +332,7 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         if (chatController != null) {
-            //chatController.stop();
+            chatController.stop();
         }
     }
 
@@ -374,4 +353,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.finish();
+    }
 }
