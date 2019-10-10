@@ -31,6 +31,7 @@ import com.example.peppercontrol20.ConversationControl.Event;
 import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 import com.example.peppercontrol20.Models.photoObject;
 import com.example.peppercontrol20.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -42,7 +43,7 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
     Uri eventIconUri, eventWallpaperUri;
     ImageView eventIcon;
     ImageView eventWallpaper;
-    ArrayList<Event> events;
+    static ArrayList<Event> events;
     private RadioButton mSelectedRB;
     private int mSelectedPosition = -1;
 
@@ -57,8 +58,18 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
             int type = p.getType();
             if(type == 0){
                 eventWallpaperUri = selectedImage;
-                Log.d("Updated:", "event Wallpaper");
-                eventWallpaper.setImageURI(eventWallpaperUri);
+                try {
+                    Picasso.get()
+                            .load(eventWallpaperUri)
+                            .placeholder(R.drawable.headline)
+                            .fit()
+                            .centerCrop()
+                            .into(eventWallpaper);
+                }
+                catch (Exception e){
+
+                }
+
             }
             else if(type == 1){
                 eventIconUri = selectedImage;
@@ -164,11 +175,14 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                     // Permission has already been granted
                     if(event.getPhoto() != null){
                         eventWallpaper.setImageURI(event.getPhoto());
+                        Picasso.get()
+                                .load(event.getPhoto())
+                                .placeholder(R.drawable.headline)
+                                .fit()
+                                .centerCrop()
+                                .into(eventWallpaper);
                     }
 
-                    if(event.getIcon() != null){
-                        eventIcon.setImageURI(event.getIcon());
-                    }
 
                 }
 
@@ -241,12 +255,11 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                db.deleteEvent(event);
                                 if(events.size() == 0){
                                     editor.putInt("Check", -1).apply();
                                 }
-                                events.remove(position);
-                                notifyDataSetChanged();
+                                db.deleteEvent(event);
+                                events = db.getAllEvents();
 
                             }
 
@@ -259,6 +272,8 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
 
                 AlertDialog dialog = builder.create();
                 dialog.show();
+                notifyDataSetChanged();
+
             }
 
         });
@@ -277,9 +292,10 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                     Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
                 }                 mSelectedPosition = position;
                 mSelectedRB = (RadioButton) v;
+
+
             }
         });
-
         if(mSelectedPosition != position){
             radioButton.setChecked(false);
         }
@@ -289,6 +305,8 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                 mSelectedRB = radioButton;
             }
         }
+
+
 
         // Return the completed view to render on screen
         return convertView;

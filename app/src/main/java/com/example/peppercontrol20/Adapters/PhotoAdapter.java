@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.example.peppercontrol20.ConversationControl.ListenConv;
 import com.example.peppercontrol20.ConversationControl.PhotoConv;
 import com.example.peppercontrol20.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +43,11 @@ public class PhotoAdapter extends ArrayAdapter<PhotoConv> {
         // Lookup view for data population
         ImageView imageView = (ImageView) convertView.findViewById(R.id.photosImage);
         // Populate the data into the template view using the data object
-        imageView.setImageURI(image.uri);
+        Picasso.get()
+                .load(image.uri)
+                .fit()
+                .centerCrop()
+                .into(imageView);
         // Return the completed view to render on screen
         Button upButton = convertView.findViewById(R.id.upButton);
         Button downButton = convertView.findViewById(R.id.downButton);

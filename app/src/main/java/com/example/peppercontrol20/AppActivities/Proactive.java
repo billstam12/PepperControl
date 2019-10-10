@@ -118,27 +118,33 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
         Listen listenTo = ListenBuilder.with(qiContext) // Create the builder with the QiContext.
                 .withPhraseSets(listenPhraseSet) // Set the PhraseSets to listen to.
                 .build(); // Build the listen action.
+        try {
+            ListenResult listenResult = listenTo.run();
+            r = new Random();
+            low = 0;
+            high = says.size();
+            result = r.nextInt(high-low) + low;
+            PhraseSet matchedPhraseSet = listenResult.getMatchedPhraseSet();
 
-        ListenResult listenResult = listenTo.run();
-        // Identify the matched phrase set.
-
-        // Get Random Respons
-        r = new Random();
-        low = 0;
-        high = says.size();
-        result = r.nextInt(high-low) + low;
-        PhraseSet matchedPhraseSet = listenResult.getMatchedPhraseSet();
-        if(PhraseSetUtil.equals(matchedPhraseSet, listenPhraseSet)){
-            Phrase sayPhrase = new Phrase(says.get(result).say);
+            if(PhraseSetUtil.equals(matchedPhraseSet, listenPhraseSet)){
+                Phrase sayPhrase = new Phrase(says.get(result).say);
 
 
-            say = SayBuilder.with(qiContext)
-                    .withPhrase(sayPhrase)
-                    .build();
+                say = SayBuilder.with(qiContext)
+                        .withPhrase(sayPhrase)
+                        .build();
 
-            say.run();
+                say.run();
+                //doAction(qiContext, conversation.getConversationActivity(), Integer.toString(conversation.getId()));
+                finish();
+            }
+        }
+        catch (Exception e){
             finish();
         }
+
+
+
 
     }
 

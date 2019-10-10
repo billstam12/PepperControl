@@ -240,6 +240,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
             // The Cursor is now set to the right position
             listens.add(new ListenConv(cursorListen.getInt(0), cursorListen.getInt(1), cursorListen.getString(2)));
         }
+        cursorListen.close();
         return listens;
     }
 
@@ -253,6 +254,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
             // The Cursor is now set to the right position
             says.add(new SayConv(cursorListen.getInt(0), cursorListen.getInt(1), cursorListen.getString(2)));
         }
+        cursorListen.close();
         return says;
     }
 
@@ -267,6 +269,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
             videos.add(new VideoConv(cursorVideo.getInt(0), cursorVideo.getInt(1), cursorVideo.getString(2),cursorVideo.getString(3),cursorVideo.getString(4),cursorVideo.getString(5)));
         }
+        cursorVideo.close();
         return videos;
     }
 
@@ -280,6 +283,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
             photos.add(new PhotoConv(cursorPhoto.getInt(0), cursorPhoto.getInt(1), Uri.parse(cursorPhoto.getString(2))));
         }
+        cursorPhoto.close();
         return photos;
     }
 
@@ -292,6 +296,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
             // The Cursor is now set to the right position
             activity = (cursorSay.getString(0));
         }
+        cursorSay.close();
         return activity;
     }
 
@@ -304,6 +309,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
             // The Cursor is now set to the right position
             proactive = (cursorSay.getInt(0));
         }
+        cursorSay.close();
         return proactive;
     }
 
@@ -316,38 +322,9 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
             // The Cursor is now set to the right position
             proactive_engagement = (cursorSay.getString(0));
         }
+        cursorSay.close();
         return proactive_engagement;
     }
-    // Getting single conversation
-    /*
-    public  Conversation getConversation(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursorListen = db.query(TABLE_LISTEN, new String[] {LISTEN}, CONV_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
-        Cursor cursorSay = db.query(TABLE_LISTEN, new String[] {LISTEN}, CONV_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
-        if (cursorListen != null)
-            cursorListen.moveToFirst();
-        if (cursorSay != null)
-            cursorSay.moveToFirst();
-
-        ArrayList<ListenConv> listens = new ArrayList<ListenConv>();
-        ArrayList<SayConv> says = new ArrayList<SayConv>();
-
-        for(cursorListen.moveToFirst(); !cursorListen.isAfterLast(); cursorListen.moveToNext()) {
-            // The Cursor is now set to the right position
-            listens.add(new ListenConv(cursorListen.getInt(0), cursorListen.getInt(1), cursorListen.getString(2)));
-        }
-        for(cursorSay.moveToFirst(); !cursorSay.isAfterLast(); cursorSay.moveToNext()) {
-            // The Cursor is now set to the right position
-            says.add(new SayConv(cursorSay.getInt(0), cursorSay.getInt(1), cursorSay.getString(2)));
-        }
-        Conversation conversation = new Conversation(listens, says);
-        // return conversation
-        return conversation;
-    }
-    */
 
     @Override
     protected void finalize() throws Throwable {
@@ -387,7 +364,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
             } while (cursor.moveToNext());
         }
-
+        cursor.close();
         // return conversation list
         return eventsList;
     }
@@ -424,24 +401,9 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
                 Cursor cursorVideo = db.rawQuery(selectQueryVideo, null);
                 Cursor cursorPhoto = db.rawQuery(selectQueryPhoto, null);
 
-                // For listens and says
-                ArrayList<Integer> listenIds = new ArrayList<Integer>();
-                ArrayList<Integer> sayIds = new ArrayList<Integer>();
-                ArrayList<Integer> listenConvIds = new ArrayList<Integer>();
-                ArrayList<Integer> sayConvIds = new ArrayList<Integer>();
-                ArrayList<String> listenStrings = new ArrayList<String>();
-                ArrayList<String> sayStrings = new ArrayList<String>();
 
                 ArrayList<ListenConv> listens = new ArrayList<ListenConv>();
                 ArrayList<SayConv> says =  new ArrayList<SayConv>();
-
-                // For Videos
-                ArrayList<Integer> videoIds = new ArrayList<>();
-                ArrayList<Integer> videoConvIds = new ArrayList<>();
-                ArrayList<String> videoURL = new ArrayList<>();
-                ArrayList<String> videoDesc = new ArrayList<>();
-                ArrayList<String> videoCat = new ArrayList<>();
-                ArrayList<String> videoName = new ArrayList<>();
 
                 ArrayList<VideoConv> videos = new ArrayList<>();
 
@@ -450,27 +412,17 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
                 for(cursorListen.moveToFirst(); !cursorListen.isAfterLast(); cursorListen.moveToNext()) {
                     // The Cursor is now set to the right position
-                    listenIds.add(cursorListen.getInt(0));
-                    listenConvIds.add(cursorListen.getInt(1));
-                    listenStrings.add(cursorListen.getString(2));
+
                     listens.add(new ListenConv(cursorListen.getInt(0),cursorListen.getInt(1),cursorListen.getString(2)));
                 }
                 for(cursorSay.moveToFirst(); !cursorSay.isAfterLast(); cursorSay.moveToNext()) {
                     // The Cursor is now set to the right position
-                    sayIds.add(cursorSay.getInt(0));
-                    sayConvIds.add(cursorSay.getInt(1));
-                    sayStrings.add(cursorSay.getString(2));
+
                     says.add(new SayConv(cursorSay.getInt(0),cursorSay.getInt(1),cursorSay.getString(2)));
                 }
 
                 for(cursorVideo.moveToFirst(); !cursorVideo.isAfterLast(); cursorVideo.moveToNext()) {
                     // The Cursor is now set to the right position
-                    videoIds.add(cursorVideo.getInt(0));
-                    videoConvIds.add(cursorVideo.getInt(1));
-                    videoURL.add(cursorVideo.getString(2));
-                    videoCat.add(cursorVideo.getString(3));
-                    videoDesc.add(cursorVideo.getString(4));
-                    videoName.add(cursorVideo.getString(5));
 
                     videos.add(new VideoConv(cursorVideo.getInt(0),cursorVideo.getInt(1),cursorVideo.getString(2),cursorVideo.getString(3),cursorVideo.getString(4),cursorVideo.getString(5)));
                 }
@@ -488,7 +440,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
                 conversationList.add(conversation);
             } while (cursor.moveToNext());
         }
-
+        cursor.close();
         // return conversation list
         return conversationList;
     }
@@ -713,6 +665,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         try {
             Cursor cursor = db.rawQuery(countQuery, null);
             int maxid = (cursor.moveToFirst() ? cursor.getInt(0) : 0);
+            cursor.close();
             return maxid;
 
         }catch (Exception e){
@@ -726,6 +679,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         try {
             Cursor cursor = db.rawQuery(countQuery, null);
             int maxid = (cursor.moveToFirst() ? cursor.getInt(0) : 0);
+            cursor.close();
             return maxid;
 
         }catch (Exception e){
@@ -740,6 +694,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         try {
             Cursor cursor = db.rawQuery(countQuery, null);
             int maxid = (cursor.moveToFirst() ? cursor.getInt(0) : 0);
+            cursor.close();
             return maxid;
 
         }catch (Exception e){
@@ -756,6 +711,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         try {
             Cursor cursor = db.rawQuery(countQuery, null);
             int maxid = (cursor.moveToFirst() ? cursor.getInt(0) : 0);
+            cursor.close();
             return maxid;
 
         }catch (Exception e){
@@ -771,6 +727,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         try {
             Cursor cursor = db.rawQuery(countQuery, null);
             int maxid = (cursor.moveToFirst() ? cursor.getInt(0) : 0);
+            cursor.close();
             return maxid;
 
         }catch (Exception e){
@@ -787,6 +744,7 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         try {
             Cursor cursor = db.rawQuery(countQuery, null);
             int maxid = (cursor.moveToFirst() ? cursor.getInt(0) : 0);
+            cursor.close();
             return maxid;
 
         }catch (Exception e){
@@ -817,7 +775,9 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
         // return name
         // return name
         try {
-            return cursor.getString(0);
+            String returnString = cursor.getString(0);
+            cursor.close();
+            return returnString;
 
 
         }catch (Exception e){
@@ -835,7 +795,9 @@ public class SQLiteDatabaseHandler extends SQLiteOpenHelper {
 
         // return name
         try {
-            return cursor.getString(0);
+            String returnString = cursor.getString(0);
+            cursor.close();
+            return returnString;
 
 
         }catch (Exception e){

@@ -87,6 +87,9 @@ public class CustomConversationList extends BaseAdapter implements Observer {
     EditText proactiveEngagement;
     public int listenIDPad = 1;
     public int sayIDPad = 1;
+    public int photoIDPad = 1;
+    public int videoIDPad = 1;
+
     public int isProactive = 0;
 
 
@@ -106,7 +109,8 @@ public class CustomConversationList extends BaseAdapter implements Observer {
             Log.d("Image", c.getUri());
 
             Uri selectedImage = Uri.parse(((editPhoto) args).getUri());
-            PhotoConv photo = new PhotoConv(db.getPhotosMaxID() + 1, ((editPhoto) args).getId(), selectedImage);
+            PhotoConv photo = new PhotoConv(db.getPhotosMaxID() + photoIDPad, ((editPhoto) args).getId(), selectedImage);
+            photoIDPad += 1;
             if(photos == null){
                 photos = db.getPhotos(((editPhoto) args).getId());
                 adptPhoto = new PhotoAdapter(context, android.R.layout.simple_list_item_1, photos);
@@ -706,18 +710,12 @@ public class CustomConversationList extends BaseAdapter implements Observer {
                 final ArrayList<SayConv> says = new ArrayList<SayConv>();
 
                 int maxVideoId = db.getVideosMaxID();
-                /*
-                // Create video and add to db
-                VideoConv video = new VideoConv(maxVideoId + 1, conversation_id, videoURL.getText().toString(), videoNAME.getText().toString(), videoDESC.getText().toString(), videoCAT.getText().toString());
 
-                if(false != videoURL.getText().toString().equals("")){
-                    db.addVideo(video);
-                }
-                */
                 Log.d("Convo_id", Integer.toString(conversations.get(positionPopup).getId()));
                 if (false == videoNAME.getText().toString().equals("") && false == videoURL.getText().toString().equals("")) {
                     Log.d("Video", videoNAME.getText().toString());
-                    videos.add(new VideoConv(maxVideoId + 1, conversations.get(positionPopup).getId(), videoURL.getText().toString(), videoCAT.getText().toString(), videoDESC.getText().toString(), videoNAME.getText().toString()));
+                    videos.add(new VideoConv(maxVideoId + videoIDPad, conversations.get(positionPopup).getId(), videoURL.getText().toString(), videoCAT.getText().toString(), videoDESC.getText().toString(), videoNAME.getText().toString()));
+                    videoIDPad += 1;
                     adptVideo.setNotifyOnChange(true);
                     videoView.setAdapter(adptVideo);
                 }

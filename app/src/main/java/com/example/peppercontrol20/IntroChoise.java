@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.peppercontrol20.AppActivities.MainActivity;
+import com.example.peppercontrol20.AppActivities.Settings;
 import com.example.peppercontrol20.AppActivities.StartPepper;
 import com.example.peppercontrol20.AppActivities.AdminPanel;
 import com.example.peppercontrol20.ConversationControl.Event;
@@ -24,6 +25,7 @@ public class IntroChoise extends AppCompatActivity {
     Button pepperButton;
     Button serverButton;
     Button adminButton;
+    Button settingsButton;
     private Dialog pwindo;
     Integer locked, eventID;
     ArrayList<Event> events;
@@ -34,6 +36,7 @@ public class IntroChoise extends AppCompatActivity {
         setContentView(R.layout.activity_intro_choise);
         pepperButton = findViewById(R.id.choosePepper);
         serverButton = findViewById(R.id.chooseServer);
+        settingsButton = findViewById(R.id.settingsButton);
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         locked = sharedPreferences.getInt("Admin lock", 1);
@@ -84,6 +87,13 @@ public class IntroChoise extends AppCompatActivity {
                     startActivity(intent);
                 }
 
+            }
+        });
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(IntroChoise.this, Settings.class);
+                startActivity(intent);
             }
         });
         adminButton.setOnClickListener(new View.OnClickListener() {

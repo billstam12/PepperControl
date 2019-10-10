@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    tools:context=".AppActivities.Settings"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:minHeight="34dp"
+        android:layout_weight="0.2"
+        android:padding="15dp"
+
+        android:background="@color/colorPrimaryDark"
+
+        android:orientation="vertical">
+
+        <TextView
+            android:textStyle="bold"
+            android:textSize="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:id="@+id/settings"
+            android:text="Settings" />
+
+        <RelativeLayout
+            android:layout_width="850dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/settings"
+            android:layout_marginTop="102dp"
+
+            >
+
+            <TextView
+                android:id="@+id/text1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set Proactive Conversation Time (seconds) "
+                android:textColor="@color/white"
+                android:textSize="20dp" />
+
+            <Spinner
+                android:id="@+id/proactiveSpinner"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginLeft="265dp"
+                android:layout_toRightOf="@id/text1"
+                android:backgroundTint="@color/white">
+
+            </Spinner>
+        </RelativeLayout>
+
+    </RelativeLayout>
+</LinearLayout>

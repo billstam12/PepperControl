@@ -17,6 +17,7 @@ import android.widget.ImageView;
 import com.example.peppercontrol20.ConversationControl.PhotoConv;
 import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 import com.example.peppercontrol20.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -76,7 +77,11 @@ public class PhotoPresentation extends FragmentActivity {
 
             Uri imageURI = photos.get(position).getUri();
             Log.d("URI", imageURI.toString());
-            imageView.setImageURI(imageURI);
+            Picasso.get()
+                    .load(imageURI)
+                    .fit()
+                    .centerCrop()
+                    .into(imageView);
             return swipeView;
         }
 

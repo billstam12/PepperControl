@@ -91,7 +91,7 @@ public class TestBluetooth extends AppCompatActivity {
 
             @Override
             public boolean handleMessage(Message msg) {
-                Log.d("Message", Integer.toString(msg.what));
+                Log.d("MessageTest", Integer.toString(msg.what));
                 switch (msg.what) {
 
                     case MESSAGE_STATE_CHANGE:

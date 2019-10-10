@@ -1,24 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="horizontal"
     tools:context=".AppActivities.StartPepper"
-    android:orientation="vertical">
+  >
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="100px"
+        android:background="@color/title_text_color"
+        android:textColor="@color/white"
+        android:text=". . ."
+        android:id="@+id/sayText"
+        android:textSize="40dp"
+        android:gravity="center"/>
+
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:minHeight="34dp"
-        android:layout_weight="0.2"
-        android:padding="15dp"
-        android:id="@+id/eventWallpaper"
+        android:layout_below="@+id/sayText"
 
-        android:orientation="vertical">
+        android:id="@+id/eventWallpaper"
+        >
 
 
 
     </ImageView>
 
 
-</LinearLayout>
+</RelativeLayout>

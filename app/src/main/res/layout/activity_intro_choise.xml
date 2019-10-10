@@ -56,5 +56,14 @@
         android:id="@+id/lockButton"
         android:background="@drawable/lock"
        />
+    <Button
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="right"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="18dp"
+        android:id="@+id/settingsButton"
+        android:background="@drawable/settings"
+        />
 
 </LinearLayout>

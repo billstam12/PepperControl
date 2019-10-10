@@ -215,6 +215,8 @@
                 android:layout_height="wrap_content"
                 android:textColorHint="@color/white"
                 android:textColor="@color/white"
+                android:backgroundTint="@color/white"
+
                 android:layout_gravity="end"
                 android:gravity="top"
                 android:id="@+id/spinnerActivity"/>
