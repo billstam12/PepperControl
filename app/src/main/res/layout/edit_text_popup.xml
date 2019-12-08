@@ -1,68 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="455dp"
     android:layout_height="100dp"
-    android:background="@color/colorPrimaryDark"
-    android:orientation="vertical"
     android:layout_gravity="center"
+    android:background="@color/colorPrimaryDark"
     android:fillViewport="true"
-    >
+    android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/popup_element"
         android:layout_width="455dp"
         android:layout_height="100dp"
         android:background="@color/colorPrimaryDark"
-        android:padding="5dp"
-        android:id="@+id/popup_element"
         android:orientation="vertical"
-        >
+        android:padding="5dp">
 
-    <Button
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_gravity="end"
-        android:gravity="center"
-        android:text="X"
-        android:textColor="@color/white"
-        android:textStyle="bold"
-        android:id="@+id/x-button"
-        android:background="@drawable/circlebackground"/>
+        <Button
+            android:id="@+id/x-button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="end"
+            android:background="@drawable/circlebackground"
+            android:gravity="center"
+            android:text="X"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
 
         <RelativeLayout
             android:layout_width="420dp"
             android:layout_height="match_parent">
+
             <EditText
+                android:id="@+id/text"
                 android:layout_width="220dp"
                 android:layout_height="wrap_content"
-                android:paddingBottom="5dp"
                 android:gravity="left"
-                android:textCursorDrawable="@color/white"
+                android:paddingBottom="5dp"
                 android:textColor="@color/white"
-                android:id="@+id/text"/>
+                android:textCursorDrawable="@color/white" />
 
             <Button
+                android:id="@+id/save_text_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Save"
-                android:textColor="@color/white"
-                android:gravity="center_horizontal"
-                android:layout_toRightOf="@id/text"
                 android:layout_marginRight="14dp"
+                android:layout_toRightOf="@id/text"
                 android:width="10dp"
-
                 android:background="@drawable/buttonshape"
-                android:id="@+id/save_text_button"/>
+                android:gravity="center_horizontal"
+
+                android:text="Save"
+                android:textColor="@color/white" />
+
             <Button
+                android:id="@+id/delete_text_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Delete"
-                android:width="10dp"
-                android:textColor="@color/white"
-                android:gravity="center_horizontal"
                 android:layout_toRightOf="@id/save_text_button"
+                android:width="10dp"
                 android:background="@drawable/buttonshape"
-                android:id="@+id/delete_text_button"/>
+                android:gravity="center_horizontal"
+                android:text="Delete"
+                android:textColor="@color/white" />
         </RelativeLayout>
     </LinearLayout>
 

@@ -9,15 +9,6 @@ public class Event {
     public int id;
     public String name;
     public Uri photo;
-
-    public ArrayList<Conversation> getConversations() {
-        return conversations;
-    }
-
-    public void setConversations(ArrayList<Conversation> conversations) {
-        this.conversations = conversations;
-    }
-
     Uri icon;
     ArrayList<Conversation> conversations;
 
@@ -36,6 +27,14 @@ public class Event {
         this.name = name;
         this.photo = photo;
         this.icon = icon;
+    }
+
+    public ArrayList<Conversation> getConversations() {
+        return conversations;
+    }
+
+    public void setConversations(ArrayList<Conversation> conversations) {
+        this.conversations = conversations;
     }
 
     public int getId() {

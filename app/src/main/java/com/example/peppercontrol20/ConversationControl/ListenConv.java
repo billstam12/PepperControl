@@ -21,6 +21,7 @@ public class ListenConv {
     public int getId() {
         return id;
     }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -28,12 +29,15 @@ public class ListenConv {
     public int getConvId() {
         return conv_id;
     }
+
     public void setConvId(int conv_id) {
         this.conv_id = conv_id;
     }
+
     public String getListen() {
         return listen;
     }
+
     public void setListen(String listen) {
         this.listen = listen;
     }

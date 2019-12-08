@@ -3,19 +3,19 @@ package com.example.peppercontrol20;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.peppercontrol20.AppActivities.AdminPanel;
 import com.example.peppercontrol20.AppActivities.MainActivity;
 import com.example.peppercontrol20.AppActivities.Settings;
 import com.example.peppercontrol20.AppActivities.StartPepper;
-import com.example.peppercontrol20.AppActivities.AdminPanel;
 import com.example.peppercontrol20.ConversationControl.Event;
 import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 
@@ -26,45 +26,50 @@ public class IntroChoise extends AppCompatActivity {
     Button serverButton;
     Button adminButton;
     Button settingsButton;
-    private Dialog pwindo;
     Integer locked, eventID;
     ArrayList<Event> events;
     SQLiteDatabaseHandler db = new SQLiteDatabaseHandler(this);
+    private Dialog pwindo;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Instansiate the view and the buttons
         setContentView(R.layout.activity_intro_choise);
         pepperButton = findViewById(R.id.choosePepper);
         serverButton = findViewById(R.id.chooseServer);
         settingsButton = findViewById(R.id.settingsButton);
+
+        //System Preferences are used to Check if the App is not or not and in which Event
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         locked = sharedPreferences.getInt("Admin lock", 1);
         eventID = sharedPreferences.getInt("Check", -1);
         adminButton = findViewById(R.id.lockButton);
 
-        if(locked == 0){
+        //If is unlocked we set the corresponding icons
+        if (locked == 0) {
             adminButton.setBackgroundResource(R.drawable.unlock);
             ViewGroup.LayoutParams params = adminButton.getLayoutParams();
             params.width = 43;
             adminButton.setLayoutParams(params);
         }
+        //Button onclick listeners
         pepperButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent;
                 String eventName = db.getEventNameByID(eventID);
-                if(locked == 1){
+                if (locked == 1) {
                     intent = new Intent(IntroChoise.this, StartPepper.class);
                     events = db.getAllEvents();
-                    if(events.size() !=0) {
-                        intent.putExtra("OpenEventID", eventID);
+                    if (events.size() != 0) {
+                        intent.putExtra("OpenEventID", eventID);    //start on the saved eventID
                         startActivity(intent);
                     }
-                }
-                else {
+                } else {
                     intent = new Intent(IntroChoise.this, AdminPanel.class);
-                        startActivity(intent);
+                    startActivity(intent);
 
                 }
             }
@@ -73,16 +78,15 @@ public class IntroChoise extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent;
-                if(locked == 1){
+                if (locked == 1) {
                     intent = new Intent(IntroChoise.this, StartPepper.class);
                     events = db.getAllEvents();
-                    if(events.size() !=0) {
-                        intent.putExtra("OpenEventID", eventID);
+                    if (events.size() != 0) {
+                        intent.putExtra("OpenEventID", eventID);    //start on the saved eventID
                         startActivity(intent);
                     }
 
-                }
-                else {
+                } else {
                     intent = new Intent(IntroChoise.this, MainActivity.class);
                     startActivity(intent);
                 }
@@ -99,7 +103,7 @@ public class IntroChoise extends AppCompatActivity {
         adminButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(locked == 1){
+                if (locked == 1) {
                     pwindo = new Dialog(IntroChoise.this);
                     pwindo.setContentView(R.layout.login);
                     pwindo.show();
@@ -127,14 +131,12 @@ public class IntroChoise extends AppCompatActivity {
                                 editor.putInt("Admin lock", 0).apply();
                                 pwindo.dismiss();
 
-                            }
-                            else{
+                            } else {
                                 wrongPassword.setVisibility(View.VISIBLE);
                             }
                         }
-                    } );
-                }
-                else{
+                    });
+                } else {
                     adminButton.setBackgroundResource(R.drawable.lock);
                     locked = 1;
                     editor.putInt("Admin lock", 1).apply();

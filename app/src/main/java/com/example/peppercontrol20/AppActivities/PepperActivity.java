@@ -1,45 +1,30 @@
 package com.example.peppercontrol20.AppActivities;
 
-import android.app.Activity;
 import android.app.Dialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Message;
-import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 import com.example.peppercontrol20.R;
 
-import java.util.ArrayList;
-
 public class PepperActivity extends AppCompatActivity {
 
+    // Make sure to declare as ArrayList so it's Serializable
+    static final String STATE_USER = "user";
+    int event_id;
+    SQLiteDatabaseHandler db;
     private Button btnSetup;
     private Button btnStart;
     private Button btnTest;
     private ListView listView;
     private TextView eventName;
     private Dialog dialog;
-
-
-    // Make sure to declare as ArrayList so it's Serializable
-    static final String STATE_USER = "user";
     private String mUser;
-    int event_id;
-    SQLiteDatabaseHandler db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +33,8 @@ public class PepperActivity extends AppCompatActivity {
 
         Intent startIntent = getIntent();
         db = new SQLiteDatabaseHandler(this);
-
+        //Get the eventID Intent and call three differente acitivities on each button press
+        //Passing to them the same eventID Intent.
         event_id = startIntent.getIntExtra("Event", db.getEventsMaxID());
         String name = db.getEventNameByID(event_id);
         eventName = findViewById(R.id.event_name);
@@ -85,8 +71,6 @@ public class PepperActivity extends AppCompatActivity {
     }
 
 
-
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 
@@ -115,7 +99,6 @@ public class PepperActivity extends AppCompatActivity {
         super.onStart();
 
 
-
     }
 
     @Override
@@ -129,7 +112,6 @@ public class PepperActivity extends AppCompatActivity {
         super.onDestroy();
 
     }
-
 
 
 }

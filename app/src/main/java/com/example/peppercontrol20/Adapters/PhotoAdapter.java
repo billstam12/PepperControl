@@ -1,20 +1,14 @@
 package com.example.peppercontrol20.Adapters;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.media.Image;
-import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.example.peppercontrol20.ConversationControl.ListenConv;
 import com.example.peppercontrol20.ConversationControl.PhotoConv;
 import com.example.peppercontrol20.R;
 import com.squareup.picasso.Picasso;
@@ -25,6 +19,7 @@ import java.util.Collections;
 public class PhotoAdapter extends ArrayAdapter<PhotoConv> {
     private ArrayList<PhotoConv> photos;
     private Context context;
+
     public PhotoAdapter(Context context, int textViewResourceId, ArrayList<PhotoConv> items) {
         super(context, textViewResourceId, items);
         this.context = context;
@@ -53,16 +48,16 @@ public class PhotoAdapter extends ArrayAdapter<PhotoConv> {
         Button downButton = convertView.findViewById(R.id.downButton);
         Button removeButton = convertView.findViewById(R.id.trashButton);
 
-        upButton.setOnClickListener(new View.OnClickListener(){
+        upButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
                 Log.d("Photo 1", photos.get(0).uri.toString());
-                if(position!=0){
+                if (position != 0) {
                     //Swap Ids first
                     int tempId = photos.get(position).id;
-                    photos.get(position).id =  photos.get(position - 1).id;
-                    photos.get(position - 1).id =  tempId;
-                    Collections.swap(photos , position, position-1);
+                    photos.get(position).id = photos.get(position - 1).id;
+                    photos.get(position - 1).id = tempId;
+                    Collections.swap(photos, position, position - 1);
 
 
                 }
@@ -70,16 +65,16 @@ public class PhotoAdapter extends ArrayAdapter<PhotoConv> {
             }
         });
 
-        downButton.setOnClickListener(new View.OnClickListener(){
+        downButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
                 Log.d("Photo 1", photos.get(0).uri.toString());
-                if(position != photos.size() - 1 ){
+                if (position != photos.size() - 1) {
                     //Swap Ids first
                     int tempId = photos.get(position).id;
-                    photos.get(position).id =  photos.get(position + 1).id;
-                    photos.get(position + 1).id =  tempId;
-                    Collections.swap(photos , position, position + 1);
+                    photos.get(position).id = photos.get(position + 1).id;
+                    photos.get(position + 1).id = tempId;
+                    Collections.swap(photos, position, position + 1);
                 }
                 notifyDataSetChanged();
             }
@@ -93,7 +88,6 @@ public class PhotoAdapter extends ArrayAdapter<PhotoConv> {
 
             }
         });
-
 
 
         return convertView;

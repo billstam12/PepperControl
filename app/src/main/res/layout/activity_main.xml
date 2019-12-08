@@ -4,70 +4,72 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
     android:orientation="vertical"
     android:padding="@dimen/activity_horizontal_margin"
-    android:background="@color/colorPrimaryDark"
 
     tools:context="com.example.peppercontrol20.AppActivities.MainActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content">
+
         <TextView
             android:id="@+id/status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
             android:layout_alignParentRight="true"
             android:padding="10dp"
+            android:text="Not Connected"
 
-            android:text="Not Connected" />
+            android:textColor="@color/white" />
+
         <TextView
             android:id="@+id/textView_angle_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+            android:layout_alignParentRight="true"
             android:layout_gravity="left"
             android:gravity="left"
             android:padding="10dp"
-            android:layout_alignParentRight="true"
-            android:text="0°"/>
+            android:text="0°"
+            android:textColor="@color/white" />
 
 
         <TextView
             android:id="@+id/textView_strength_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
             android:layout_below="@+id/textView_angle_right"
-            android:textColor="@color/white"
+            android:layout_alignParentRight="true"
             android:layout_gravity="left"
             android:padding="10dp"
-            android:text="0%"/>
+            android:text="0%"
+            android:textColor="@color/white" />
 
 
         <TextView
             android:id="@+id/textView_coordinate_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/textView_strength_right"
             android:layout_alignParentRight="true"
-            android:textColor="@color/white"
             android:layout_gravity="left"
             android:padding="10dp"
-            android:layout_below="@+id/textView_strength_right"
-            android:text="x050:x050"/>
+            android:text="x050:x050"
+            android:textColor="@color/white" />
 
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:minHeight="64dp"
         android:layout_weight="0.2"
-        android:padding="15dp"
         android:background="@color/colorPrimaryDark"
+        android:minHeight="64dp"
+        android:orientation="vertical"
 
-        android:orientation="vertical">
-
+        android:padding="15dp">
 
 
         <Button
@@ -75,37 +77,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:textColor="@color/white"
-            android:textStyle="bold"
             android:background="@drawable/buttonshape"
-            android:text="Connect" />
+            android:text="Connect"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
 
 
     </LinearLayout>
 
 
-
-
-    <io.github.controlwear.virtual.joystick.android.JoystickView
-        xmlns:custom="http://schemas.android.com/apk/res-auto"
+    <io.github.controlwear.virtual.joystick.android.JoystickView xmlns:custom="http://schemas.android.com/apk/res-auto"
         android:id="@+id/joystickView_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
         android:layout_marginTop="64dp"
-        custom:JV_borderWidth="8dp"
         custom:JV_backgroundColor="#009688"
         custom:JV_borderColor="#00796B"
-        custom:JV_buttonColor="#FF6E40"/>
+        custom:JV_borderWidth="8dp"
+        custom:JV_buttonColor="#FF6E40" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="20dp"
         android:layout_weight="0.1"
+        android:background="@color/colorPrimaryDark"
         android:orientation="horizontal"
         android:paddingTop="15dp"
-        android:background="@color/colorPrimaryDark"
 
         >
 

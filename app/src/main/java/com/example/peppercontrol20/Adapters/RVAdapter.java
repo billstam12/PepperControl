@@ -2,7 +2,6 @@ package com.example.peppercontrol20.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,9 +22,9 @@ import java.util.List;
 
 public class RVAdapter extends RecyclerView.Adapter<RVAdapter.MyViewHolder> {
 
-    RequestOptions options ;
-    private Context mContext ;
-    private List<VideoConv> mData ;
+    RequestOptions options;
+    private Context mContext;
+    private List<VideoConv> mData;
 
 
     public RVAdapter(Context mContext, List<VideoConv> mData) {
@@ -43,11 +42,11 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.MyViewHolder> {
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View view ;
+        View view;
         LayoutInflater mInflater = LayoutInflater.from(parent.getContext());
-        view = mInflater.inflate(R.layout.media_row ,parent,false);
+        view = mInflater.inflate(R.layout.media_row, parent, false);
         // click listener here
-        final MyViewHolder viewHolder = new MyViewHolder(view) ;
+        final MyViewHolder viewHolder = new MyViewHolder(view);
         viewHolder.view_container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,10 +55,10 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.MyViewHolder> {
                 Log.d("Holder", mData.get(viewHolder.getAdapterPosition()).toString());
                 // sending data process
 
-                i.putExtra("Video Name",mData.get(viewHolder.getAdapterPosition()).getName());
-                i.putExtra("Video Description",mData.get(viewHolder.getAdapterPosition()).getDescription());
-                i.putExtra("Video URL",mData.get(viewHolder.getAdapterPosition()).getUrl());
-                i.putExtra("Video Category",mData.get(viewHolder.getAdapterPosition()).getCategory());
+                i.putExtra("Video Name", mData.get(viewHolder.getAdapterPosition()).getName());
+                i.putExtra("Video Description", mData.get(viewHolder.getAdapterPosition()).getDescription());
+                i.putExtra("Video URL", mData.get(viewHolder.getAdapterPosition()).getUrl());
+                i.putExtra("Video Category", mData.get(viewHolder.getAdapterPosition()).getCategory());
 
 
                 mContext.startActivity(i);
@@ -77,7 +76,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.MyViewHolder> {
         holder.category.setText(mData.get(position).getCategory());
         Log.d("Description", mData.get(position).getDescription());
         Log.d("Category", mData.get(position).getCategory());
-        String uri= (mData.get(position).getUrl());
+        String uri = (mData.get(position).getUrl());
         Log.d("Uri", uri);
 
         Glide.with(mContext)
@@ -106,7 +105,7 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.MyViewHolder> {
             name = itemView.findViewById(R.id.rowname);
             description = itemView.findViewById(R.id.description);
             thumbnail = itemView.findViewById(R.id.thumbnail);
-            category  = itemView.findViewById(R.id.category);
+            category = itemView.findViewById(R.id.category);
             //video = itemView.findViewById(R.id.aa_video_url);
 
         }

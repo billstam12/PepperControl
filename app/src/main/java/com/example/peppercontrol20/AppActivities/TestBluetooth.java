@@ -8,11 +8,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,7 +21,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,37 +31,56 @@ import java.util.ArrayList;
 import java.util.Set;
 
 public class TestBluetooth extends AppCompatActivity {
-    static TextView status;
-    static Button btnConnect;
-    private Button btnSetup;
-    private Button btnStart;
-    static TextView percent;
-    static TextView angle;
-    static TextView coordinates;
-    static ImageView pepperIcon;
-    private TextView eventName;
-    private Dialog dialog;
-    private TextInputLayout inputLayout;
-    private BluetoothAdapter bluetoothAdapter;
-
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
     public static final int MESSAGE_DEVICE_OBJECT = 4;
     public static final int MESSAGE_TOAST = 5;
     public static final String DEVICE_OBJECT = "Robot";
-
+    // Make sure to declare as ArrayList so it's Serializable
+    static final String STATE_USER = "user";
     private static final int REQUEST_ENABLE_BLUETOOTH = 1;
+    private static final String STATE_COUNTER = "Counter";
+    private static final String STATE_ITEMS = "Chat";
+    static TextView status;
+    static Button btnConnect;
+    static TextView percent;
+    static TextView angle;
+    static TextView coordinates;
+    static ImageView pepperIcon;
+    private Button btnSetup;
+    private Button btnStart;
+    private TextView eventName;
+    private Dialog dialog;
+    private TextInputLayout inputLayout;
+    private BluetoothAdapter bluetoothAdapter;
     private ChatController chatController;
     private BluetoothDevice connectingDevice;
     private ArrayAdapter<String> discoveredDevicesAdapter;
-    private int mCounter;
-    private static final String STATE_COUNTER = "Counter";
+    //The BroadcastReceiver uses the Bluetooth service we set up
+    //To make a connection
+    private final BroadcastReceiver discoveryFinishReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
 
-    // Make sure to declare as ArrayList so it's Serializable
-    static final String STATE_USER = "user";
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    discoveredDevicesAdapter.add(device.getName() + "\n" + device.getAddress());
+                }
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                if (discoveredDevicesAdapter.getCount() == 0) {
+                    discoveredDevicesAdapter.add(getString(R.string.none_found));
+                }
+            }
+        }
+    };
+    private int mCounter;
     private String mUser;
     private Handler handler;
+    // Make sure to declare as ArrayList so it's Serializable
+    private ArrayList<ChatController> mItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,21 +99,18 @@ public class TestBluetooth extends AppCompatActivity {
             // Restore value of members from saved state
             status.setText(savedInstanceState.getString("CONNECT"));
 
-        }
-        else {
+        } else {
             // Probably initialize members with default values for a new instance
 
         }
-
-         handler = new Handler(new Handler.Callback() {
+        //The messages are handled in the Secondary Thread by this Handle
+        handler = new Handler(new Handler.Callback() {
 
             @Override
             public boolean handleMessage(Message msg) {
-                Log.d("MessageTest", Integer.toString(msg.what));
                 switch (msg.what) {
 
                     case MESSAGE_STATE_CHANGE:
-                        Log.d("Message2", Integer.toString(msg.arg1));
 
                         switch (msg.arg1) {
                             case ChatController.STATE_CONNECTED:
@@ -127,36 +142,34 @@ public class TestBluetooth extends AppCompatActivity {
                         percent.setText(readOutput[1] + " %");
                         String coordinatesText = "X: " + readOutput[2] + " Y: " + readOutput[3];
                         coordinates.setText(coordinatesText);
-                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)pepperIcon.getLayoutParams();
+                        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) pepperIcon.getLayoutParams();
                         //Change position
-                        int left,top;
+                        int left, top;
                         int newLeft, newTop;
 
                         int x = Integer.parseInt(readOutput[2]);
                         int y = Integer.parseInt(readOutput[3]);
                         int power = Integer.parseInt(readOutput[1]);
                         left = params.leftMargin;
-                        top  = params.topMargin;
+                        top = params.topMargin;
                         double offset = 0.2;
-                        if(y > 40 && y < 60) {
-                            if (x < 50 ) {
+                        if (y > 40 && y < 60) {
+                            if (x < 50) {
                                 newLeft = (int) (left - (offset * power));
-                            } else{
+                            } else {
                                 newLeft = (int) (left + (offset * power));
                             }
-                        }
-                        else{
+                        } else {
                             newLeft = left;
                         }
-                        if(x > 40 && x < 60) {
+                        if (x > 40 && x < 60) {
                             if (y < 50) {
                                 newTop = (int) (top - (offset * power));
                             } else {
                                 newTop = (int) (top + (offset * power));
 
                             }
-                        }
-                        else{
+                        } else {
                             newTop = top;
                         }
 
@@ -178,7 +191,7 @@ public class TestBluetooth extends AppCompatActivity {
             }
         });
 
-        chatController =  ChatController.getInstance(handler);
+        chatController = ChatController.getInstance(handler);
 
         resetIcon();
 
@@ -191,16 +204,14 @@ public class TestBluetooth extends AppCompatActivity {
         });
     }
 
-
-    private void resetIcon(){
+    private void resetIcon() {
+        /* This functions resets the Icons place on Start */
         int top = pepperIcon.getTop();
         int bottom = pepperIcon.getBottom();
         int left = pepperIcon.getLeft();
         int right = pepperIcon.getRight();
         Log.d("Top", Integer.toString(top));
-        //RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pepperIcon.getLayoutParams());
-        //layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, 0);
-        //pepperIcon.setLayoutParams(layoutParams);
+
         pepperIcon.setTop(50);
         Log.d("Top", Integer.toString(top));
 
@@ -208,6 +219,7 @@ public class TestBluetooth extends AppCompatActivity {
         pepperIcon.setLeft(left);
         pepperIcon.setRight(right);
     }
+
     private void showPrinterPickDialog() {
         dialog = new Dialog(this);
         dialog.setContentView(R.layout.layout_bluetooth);
@@ -295,12 +307,6 @@ public class TestBluetooth extends AppCompatActivity {
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(deviceAddress);
         chatController.connect(device);
     }
-    private static final String STATE_ITEMS = "Chat";
-
-    // Make sure to declare as ArrayList so it's Serializable
-    private ArrayList<ChatController> mItems;
-
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -320,7 +326,6 @@ public class TestBluetooth extends AppCompatActivity {
 
     }
 
-
     private void findViewsByIds() {
         status = (TextView) findViewById(R.id.status);
         btnConnect = (Button) findViewById(R.id.btn_connect);
@@ -336,14 +341,12 @@ public class TestBluetooth extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_ENABLE_BLUETOOTH:
                 if (resultCode == Activity.RESULT_OK) {
-                    chatController =  ChatController.getInstance(handler);
+                    chatController = ChatController.getInstance(handler);
                     Toast.makeText(this, "Bluetooth still disabled, turn off application!", Toast.LENGTH_SHORT).show();
                     finish();
                 }
         }
     }
-
-
 
     @Override
     public void onStart() {
@@ -353,7 +356,7 @@ public class TestBluetooth extends AppCompatActivity {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BLUETOOTH);
         } else {
-            chatController =  ChatController.getInstance(handler);
+            chatController = ChatController.getInstance(handler);
         }
 
     }
@@ -368,8 +371,7 @@ public class TestBluetooth extends AppCompatActivity {
                 chatController.start();
                 chatController.setHandler(handler);
 
-            }
-            else{
+            } else {
                 chatController = ChatController.getInstance(handler);
                 chatController.start();
                 chatController.setHandler(handler);
@@ -399,23 +401,6 @@ public class TestBluetooth extends AppCompatActivity {
             handler.removeCallbacks(null);
         }
     }
-    private final BroadcastReceiver discoveryFinishReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-                    discoveredDevicesAdapter.add(device.getName() + "\n" + device.getAddress());
-                }
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                if (discoveredDevicesAdapter.getCount() == 0) {
-                    discoveredDevicesAdapter.add(getString(R.string.none_found));
-                }
-            }
-        }
-    };
 
 
 }

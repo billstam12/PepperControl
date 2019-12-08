@@ -4,75 +4,77 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
     android:orientation="vertical"
     android:padding="@dimen/activity_horizontal_margin"
-    android:background="@color/colorPrimaryDark"
 
     tools:context="com.example.peppercontrol20.AppActivities.TestBluetooth">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
+        android:layout_height="wrap_content">
+
         <TextView
             android:id="@+id/textView_angle_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/blueLight"
-            android:textColor="@color/white"
+            android:layout_alignParentRight="true"
             android:layout_gravity="left"
+            android:background="@color/blueLight"
             android:gravity="left"
             android:padding="10dp"
-            android:layout_alignParentRight="true"
-            android:text="0°"/>
+            android:text="0°"
+            android:textColor="@color/white" />
 
 
         <TextView
             android:id="@+id/textView_strength_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
             android:layout_below="@+id/textView_angle_right"
-            android:background="@color/blueLight"
-            android:textColor="@color/white"
+            android:layout_alignParentRight="true"
             android:layout_gravity="left"
-
+            android:background="@color/blueLight"
             android:padding="10dp"
-            android:text="0%"/>
+
+            android:text="0%"
+            android:textColor="@color/white" />
 
 
         <TextView
             android:id="@+id/textView_coordinate_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:background="@color/blueLight"
-            android:textColor="@color/white"
-            android:layout_gravity="left"
-            android:padding="10dp"
             android:layout_below="@+id/textView_strength_right"
-            android:text="x050:y050"/>
+            android:layout_alignParentRight="true"
+            android:layout_gravity="left"
+            android:background="@color/blueLight"
+            android:padding="10dp"
+            android:text="x050:y050"
+            android:textColor="@color/white" />
+
         <TextView
             android:id="@+id/status"
             android:layout_width="match_parent"
-            android:gravity="center_horizontal|center_vertical"
             android:layout_height="match_parent"
-
             android:background="@color/blueLight"
-            android:textColor="@color/white"
-            android:text="Not Connected" />
+
+            android:gravity="center_horizontal|center_vertical"
+            android:text="Not Connected"
+            android:textColor="@color/white" />
     </LinearLayout>
 
 
-        <Button
-            android:id="@+id/btn_connect"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/buttonshape"
-            android:text="Connect"
-            android:textColor="@color/white"
-            android:layout_marginBottom="20dp"
-            android:textStyle="bold" />
+    <Button
+        android:id="@+id/btn_connect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/buttonshape"
+        android:text="Connect"
+        android:textColor="@color/white"
+        android:textStyle="bold" />
 
 
     <LinearLayout
@@ -90,9 +92,6 @@
             android:layout_marginTop="190px"
             android:background="@drawable/pepper_icon2" />
     </LinearLayout>
-    
-
-
 
 
 </LinearLayout>

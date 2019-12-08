@@ -1,9 +1,9 @@
 package com.example.peppercontrol20.AppActivities;
 
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,6 +15,7 @@ import com.example.peppercontrol20.R;
 public class Settings extends AppCompatActivity {
 
     Spinner spinner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,8 +40,8 @@ public class Settings extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 editor.putInt("Proactive", Integer.parseInt(spinner.getItemAtPosition(position).toString())).apply();
-                ((TextView)view).setTextColor(getResources().getColor(R.color.white));
-                ((TextView)view).setTextSize(20);
+                ((TextView) view).setTextColor(getResources().getColor(R.color.white));
+                ((TextView) view).setTextSize(20);
 
             }
 

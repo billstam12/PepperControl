@@ -1,22 +1,21 @@
 /*
-        * Copyright (C) 2009 The Android Open Source Project
-        *
-        * Licensed under the Apache License, Version 2.0 (the "License");
-        * you may not use this file except in compliance with the License.
-        * You may obtain a copy of the License at
-        *
-        *      http://www.apache.org/licenses/LICENSE-2.0
-        *
-        * Unless required by applicable law or agreed to in writing, software
-        * distributed under the License is distributed on an "AS IS" BASIS,
-        * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-        * See the License for the specific language governing permissions and
-        * limitations under the License.
-        */
+ * Copyright (C) 2009 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-        package com.example.peppercontrol20.Controllers;
+package com.example.peppercontrol20.Controllers;
 
-import android.app.Application;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -31,7 +30,6 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 
 import com.example.peppercontrol20.AppActivities.MainActivity;
-import com.example.peppercontrol20.Services.BluetoothService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,36 +37,39 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class ChatController  extends Service implements Serializable{
+public class ChatController extends Service implements Serializable {
+    public static final int STATE_NONE = 0;
+    public static final int STATE_LISTEN = 1;
+    public static final int STATE_CONNECTING = 2;
+    public static final int STATE_CONNECTED = 3;
     private static final String APP_NAME = "Pepper Control 2.0";
     private static final UUID MY_UUID = UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
-
+    public static ChatController INSTANCE = null;
     private final BluetoothAdapter bluetoothAdapter;
+    private final IBinder mBinder = new LocalBinder();
     private Handler handler;
     private AcceptThread acceptThread;
     private ConnectThread connectThread;
     private ReadWriteThread connectedThread;
     private int state;
 
-    public static final int STATE_NONE = 0;
-    public static final int STATE_LISTEN = 1;
-    public static final int STATE_CONNECTING = 2;
-    public static final int STATE_CONNECTED = 3;
-
-    public static ChatController INSTANCE = null;
-
-    public static synchronized ChatController getInstance(Handler handler){
-        if(INSTANCE==null){
-            INSTANCE = new ChatController(handler);
-        }
-        return (INSTANCE);
-    }
-
     public ChatController(Handler handler) {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         state = STATE_NONE;
 
         this.handler = handler;
+    }
+
+    public static synchronized ChatController getInstance(Handler handler) {
+        if (INSTANCE == null) {
+            INSTANCE = new ChatController(handler);
+        }
+        return (INSTANCE);
+    }
+
+    // get current connection state
+    public synchronized int getState() {
+        return state;
     }
 
     // Set the current state of the chat connection
@@ -78,14 +79,14 @@ public class ChatController  extends Service implements Serializable{
         handler.obtainMessage(MainActivity.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
 
-    // get current connection state
-    public synchronized int getState() {
-        return state;
+    public synchronized Handler getHandler() {
+        return handler;
     }
 
-    public synchronized Handler getHandler() { return handler; }
+    public synchronized void setHandler(Handler handler) {
+        this.handler = handler;
+    }
 
-    public synchronized void setHandler(Handler handler) { this.handler =  handler; }
     // start service
     public synchronized void start() {
         // Cancel any thread
@@ -218,7 +219,6 @@ public class ChatController  extends Service implements Serializable{
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
-    private final IBinder mBinder = new LocalBinder();
 
     public class LocalBinder extends Binder {
         ChatController getService() {

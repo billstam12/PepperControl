@@ -21,24 +21,21 @@ import java.util.Vector;
 
 public class BluetoothService extends Service {
 
-    private BluetoothAdapter mBluetoothAdapter;
     public static final String B_DEVICE = "MY DEVICE";
     public static final String B_UUID = "00001101-0000-1000-8000-00805f9b34fb";
-
     public static final int STATE_NONE = 0;
     public static final int STATE_LISTEN = 1;
     public static final int STATE_CONNECTING = 2;
     public static final int STATE_CONNECTED = 3;
-
-    private ConnectBtThread mConnectThread;
-    private static ConnectedBtThread mConnectedThread;
-
-    private static Handler mHandler = null;
     public static int mState = STATE_NONE;
     public static String deviceName;
     public static BluetoothDevice sDevice = null;
+    private static ConnectedBtThread mConnectedThread;
+    private static Handler mHandler = null;
+    private final IBinder mBinder = new LocalBinder();
     public Vector<Byte> packData = new Vector<>(2048);
-
+    private BluetoothAdapter mBluetoothAdapter;
+    private ConnectBtThread mConnectThread;
 
     @Nullable
     @Override
@@ -49,15 +46,6 @@ public class BluetoothService extends Service {
 
     public void toast(String mess) {
         Toast.makeText(this, mess, Toast.LENGTH_SHORT).show();
-    }
-
-    private final IBinder mBinder = new LocalBinder();
-
-    public class LocalBinder extends Binder {
-        BluetoothService getService() {
-            // Return this instance of LocalService so clients can call public methods
-            return BluetoothService.this;
-        }
     }
 
     @Override
@@ -140,6 +128,19 @@ public class BluetoothService extends Service {
 
         mBluetoothAdapter.cancelDiscovery();
         return super.stopService(name);
+    }
+
+    @Override
+    public void onDestroy() {
+        this.stop();
+        super.onDestroy();
+    }
+
+    public class LocalBinder extends Binder {
+        BluetoothService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return BluetoothService.this;
+        }
     }
 
     private class ConnectBtThread extends Thread {
@@ -253,12 +254,6 @@ public class BluetoothService extends Service {
                 e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public void onDestroy() {
-        this.stop();
-        super.onDestroy();
     }
 
 }

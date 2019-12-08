@@ -8,11 +8,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -25,7 +25,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,18 +40,22 @@ import com.example.peppercontrol20.ConversationControl.PhotoConv;
 import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 import com.example.peppercontrol20.ConversationControl.SayConv;
 import com.example.peppercontrol20.ConversationControl.VideoConv;
+import com.example.peppercontrol20.ConversationControl.editPhoto;
 import com.example.peppercontrol20.R;
 
 import java.util.ArrayList;
 
-public class SetupRobot extends AppCompatActivity  {
+public class SetupRobot extends AppCompatActivity {
 
+    public Boolean isProactive = false;
     ArrayList<Conversation> conversations;
+
+    // to save the says and listens before the user saves
     ArrayList<ListenConv> tmpListens;
-    Integer tmpListenId = 0;
-
-
     ArrayList<SayConv> tmpSays;
+
+    // to save the biggest IDS
+    Integer tmpListenId = 0;
     Integer tmpSayId = 0;
     Integer photoId = 0;
     SQLiteDatabaseHandler db;
@@ -94,7 +97,6 @@ public class SetupRobot extends AppCompatActivity  {
     VideoAdapter adptVideo;
     ImageView imageView;
     PhotoAdapter adptPhoto;
-    public Boolean isProactive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,14 +104,16 @@ public class SetupRobot extends AppCompatActivity  {
         // Get event
         Intent startIntent = getIntent();
         setContentView(R.layout.activity_setup_robot);
-        activity=this;
+        activity = this;
 
         pwindo = new Dialog(this);
 
         db = new SQLiteDatabaseHandler(this);
+
+        //Get the EventID Intent
         event_id = startIntent.getIntExtra("Event", db.getEventsMaxID());
-        tmpSayId = db.getSaysMaxID();
-        tmpListenId = db.getListenMaxID();
+        tmpSayId = db.getSaysMaxID(); //Max Say ID to Increment
+        tmpListenId = db.getListenMaxID(); //Max Listen ID to Increment
         listView = (ListView) findViewById(android.R.id.list);
 
         //final LinearLayout et2 =(LinearLayout) newView.getChildAt(newView.getChildCount());
@@ -117,6 +121,7 @@ public class SetupRobot extends AppCompatActivity  {
         final TextView giveMeText = findViewById(R.id.giveMeSomething);
         btnSubmit = (Button) findViewById(R.id.btnSubmit);
         btnAddIntro = (Button) findViewById(R.id.btnSubmitIntro);
+        //  When the user presses the add Conversation button we open the popup
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -124,7 +129,8 @@ public class SetupRobot extends AppCompatActivity  {
             }
         });
         //Introduction Button
-        //Shared Pref
+        //Shared Pref contains the introduction
+        //TODO: Remove or put in each event individually through the Database
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         final SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -139,7 +145,6 @@ public class SetupRobot extends AppCompatActivity  {
                 addIntro.setText("");
             }
         });
-
 
 
         conversations = (ArrayList<Conversation>) db.getAllConversations(event_id);
@@ -192,7 +197,7 @@ public class SetupRobot extends AppCompatActivity  {
         tmpSays = new ArrayList<SayConv>();
         addVideo = pwindo.findViewById(R.id.addVideoButton);
         addPhoto = pwindo.findViewById(R.id.addPhotoButton);
-        videos  = new ArrayList<>();
+        videos = new ArrayList<>();
         adptVideo = new VideoAdapter(this,
                 android.R.layout.simple_list_item_1, videos);
         videoView = pwindo.findViewById(R.id.listViewVideo);
@@ -201,15 +206,15 @@ public class SetupRobot extends AppCompatActivity  {
         photoView.setAdapter(adptPhoto);
         videoView.setAdapter(adptVideo);
 
-        // Make proactive
+        // Make proactive, onclick we make the proactive layout visible
+        // With this the user will see the proactive engagement text box
         btnMakeProactive.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
+                if (isChecked) {
                     proactiveLayout.setVisibility(View.VISIBLE);
                     isProactive = true;
-                }
-                else{
+                } else {
                     listenLayout.setVisibility(View.VISIBLE);
                     proactiveLayout.setVisibility(View.GONE);
                     isProactive = false;
@@ -222,17 +227,23 @@ public class SetupRobot extends AppCompatActivity  {
                 android.R.layout.simple_list_item_1, tmpListens);
         listenView.setAdapter(adptListen);
 
-        /* Add longpress to Edit */
+        /* Add longpress to Edit
+        * Because we want to be able to edit even if the user has not
+        * pressed save. The longPress to edit, edits the says and listens
+        * that are in the tmpListens and tmpSays database.
+        * WHEN THE USER SAVES THE view, those listens and says are the ones we
+        * submit into the database.
+        * */
         listenView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
                                            int pos, long id) {
                 // Open popup
-                Log.v("long clicked","pos: " + pos);
+                Log.v("long clicked", "pos: " + pos);
                 pwindo_edit_text = new Dialog(pwindo.getContext());
                 pwindo_edit_text.setContentView(R.layout.edit_text_popup);
                 EditText listenEditText = pwindo_edit_text.findViewById(R.id.text);
-                ListenConv ls = (ListenConv)arg0.getAdapter().getItem(pos);
+                ListenConv ls = (ListenConv) arg0.getAdapter().getItem(pos);
                 listenEditText.setText(ls.listen);
                 pwindo_edit_text.show();
 
@@ -258,7 +269,7 @@ public class SetupRobot extends AppCompatActivity  {
                 saveEditListen.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        tmpListens.set(pos, new ListenConv(tmpListens.get(pos).id, tmpListens.get(pos).conv_id,  listenEditText.getText().toString()));
+                        tmpListens.set(pos, new ListenConv(tmpListens.get(pos).id, tmpListens.get(pos).conv_id, listenEditText.getText().toString()));
                         //listensText.set(pos, listenEditText.getText().toString());
                         adptListen.setNotifyOnChange(true);
                         listenView.setAdapter(adptListen);
@@ -285,11 +296,11 @@ public class SetupRobot extends AppCompatActivity  {
                                            int pos, long id) {
                 // TODO Auto-generated method stub
 
-                Log.v("long clicked","pos: " + pos);
+                Log.v("long clicked", "pos: " + pos);
                 pwindo_edit_text = new Dialog(pwindo.getContext());
                 pwindo_edit_text.setContentView(R.layout.edit_text_popup);
                 EditText sayEditText = pwindo_edit_text.findViewById(R.id.text);
-                SayConv s = (SayConv)arg0.getAdapter().getItem(pos);
+                SayConv s = (SayConv) arg0.getAdapter().getItem(pos);
                 sayEditText.setText(s.say);
                 pwindo_edit_text.show();
 
@@ -315,7 +326,7 @@ public class SetupRobot extends AppCompatActivity  {
                 saveEditListen.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        tmpSays.set(pos, new SayConv(tmpSays.get(pos).id, tmpSays.get(pos).conv_id,  sayEditText.getText().toString()));
+                        tmpSays.set(pos, new SayConv(tmpSays.get(pos).id, tmpSays.get(pos).conv_id, sayEditText.getText().toString()));
                         //saysText.set(pos, sayEditText.getText().toString());
                         adptSay.setNotifyOnChange(true);
                         sayView.setAdapter(adptSay);
@@ -337,8 +348,10 @@ public class SetupRobot extends AppCompatActivity  {
             @Override
             public void onClick(View v) {
                 String listen = listenText.getText().toString();
+                /* Add the listen if it is not "" and increment the id count
 
-                if(listen!= ""){
+                 */
+                if (listen != "") {
                     ListenConv tmpListen = new ListenConv();
                     //saysText.add(say);
                     tmpListenId += 1;
@@ -357,10 +370,10 @@ public class SetupRobot extends AppCompatActivity  {
             @Override
             public void onClick(View v) {
                 String say = sayText.getText().toString();
-                if(say!= ""){
+                if (say != "") {
                     SayConv tmpSay = new SayConv();
                     //saysText.add(say);
-                    tmpSayId  += 1;
+                    tmpSayId += 1;
                     Log.d("Max Say ID", Integer.toString(db.getListenMaxID()));
                     tmpSay = new SayConv(tmpSayId, conversation_id, say);
                     tmpSays.add(tmpSay);
@@ -375,8 +388,9 @@ public class SetupRobot extends AppCompatActivity  {
         btnSoundSay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                /* This calls an empty instance of the PepperActivity to say the sentence */
                 String say = sayText.getText().toString();
-                if(say!= ""){
+                if (say != "") {
                     Intent intent = new Intent(SetupRobot.this, ListenSay.class);
                     intent.setAction(Intent.ACTION_MAIN);
                     intent.addCategory(Intent.CATEGORY_HOME);
@@ -401,7 +415,7 @@ public class SetupRobot extends AppCompatActivity  {
         videoLayout = pwindo.findViewById(R.id.videoLayout);
         photoLayout = pwindo.findViewById(R.id.photoLayout);
         spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener(){
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1,
                                        int arg2, long arg3) {
@@ -410,14 +424,13 @@ public class SetupRobot extends AppCompatActivity  {
                 String selCat = spinner.getItemAtPosition(arg2).toString();
 
 
-                if(selCat.equals("Video")){
+                if (selCat.equals("Video")) {
                     videoLayout.setVisibility(View.VISIBLE);
-                }
-                else {
+                } else {
                     videoLayout.setVisibility(View.GONE);
                 }
 
-                if(selCat.equals("Photo")){
+                if (selCat.equals("Photo")) {
                     photoLayout.setVisibility(View.VISIBLE);
                     // Here, thisActivity is the current activity
                     if (ContextCompat.checkSelfPermission(getApplicationContext(),
@@ -434,7 +447,7 @@ public class SetupRobot extends AppCompatActivity  {
                         } else {
                             // No explanation needed; request the permission
                             ActivityCompat.requestPermissions(SetupRobot.this,
-                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
 
                             // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
                             // app-defined int constant. The callback method gets the
@@ -444,8 +457,7 @@ public class SetupRobot extends AppCompatActivity  {
                         // Permission has already been granted
 
                     }
-                }
-                else{
+                } else {
                     photoLayout.setVisibility(View.GONE);
                 }
             }
@@ -462,7 +474,7 @@ public class SetupRobot extends AppCompatActivity  {
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
                                            int pos, long id) {
                 // Open popup
-                Log.v("long clicked","pos: " + pos);
+                Log.v("long clicked", "pos: " + pos);
                 pwindo_edit_video = new Dialog(pwindo.getContext());
                 pwindo_edit_video.setContentView(R.layout.edit_video_new);
                 EditText videoName = pwindo_edit_video.findViewById(R.id.video_name);
@@ -470,7 +482,7 @@ public class SetupRobot extends AppCompatActivity  {
                 EditText videoCat = pwindo_edit_video.findViewById(R.id.video_cat);
                 EditText videoDesc = pwindo_edit_video.findViewById(R.id.video_desc);
 
-                VideoConv video = (VideoConv)arg0.getAdapter().getItem(pos);
+                VideoConv video = (VideoConv) arg0.getAdapter().getItem(pos);
                 videoName.setText(video.name);
                 videoURL.setText(video.url);
                 videoCat.setText(video.category);
@@ -528,12 +540,14 @@ public class SetupRobot extends AppCompatActivity  {
             public void onClick(View v) {
                 Intent pickPhoto = new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(pickPhoto , 1);//one can be replaced with any action code
+                startActivityForResult(pickPhoto, 1);//one can be replaced with any action code
             }
         });
 
 
-        //Photo View buttons
+        /* When the user clicks Save, we create a conversation and add it to the database
+           while incrementing the conversation_id count too.
+         */
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -541,33 +555,31 @@ public class SetupRobot extends AppCompatActivity  {
                 final String conversationActivity = spinner.getSelectedItem().toString(); // Small, Medium, Large
 
 
-               if(isProactive) {
+                if (isProactive) {
                     Conversation conversation = new Conversation(conversation_id, event_id, tmpListens, tmpSays, videos, photos, conversationActivity, proactiveEngagement.getText().toString());
                     conversation.setConversationProactive(1);
                     Log.d("Proactive Engagement", proactiveEngagement.getText().toString());
 
-                    if(!proactiveEngagement.getText().toString().equals("")) {
+                    if (!proactiveEngagement.getText().toString().equals("")) {
                         conversation_id++;
                         db.addConversation(conversation);
                     }
-                }
-                else{
+                } else {
                     Conversation conversation = new Conversation(conversation_id, event_id, tmpListens, tmpSays, videos, photos, conversationActivity);
                     conversation.setConversationProactive(0);
-                    if(tmpListens.size()!=0 && tmpSays.size()!=0) {
+                    if (tmpListens.size() != 0 && tmpSays.size() != 0) {
                         conversation_id++;
                         db.addConversation(conversation);
                     }
                 }
                 isProactive = false;
-                if(customConversationList==null)
-                {
+                if (customConversationList == null) {
                     customConversationList = new CustomConversationList(activity, conversations, db, event_id);
                     listView.setAdapter(customConversationList);
                 }
 
                 customConversationList.conversations = (ArrayList) db.getAllConversations(event_id);
-                ((BaseAdapter)listView.getAdapter()).notifyDataSetChanged();
+                ((BaseAdapter) listView.getAdapter()).notifyDataSetChanged();
                 for (Conversation conversation1 : conversations) {
                     String log = "Id: " + conversation1.getId() + " ,Listen: " + conversation1.getConversationListen() + " ,Say: " + conversation1.getConversationSay();
                     // Writing Countries to log
@@ -575,9 +587,9 @@ public class SetupRobot extends AppCompatActivity  {
                 }
                 try {
                     pwindo.dismiss();
-                }catch (Exception e){
+                } catch (Exception e) {
                     Log.d("Exception", e.toString());
-                }finally {
+                } finally {
                     pwindo.dismiss();
                 }
             }
@@ -598,9 +610,9 @@ public class SetupRobot extends AppCompatActivity  {
         final SharedPreferences.Editor editor = sharedPreferences.edit();
 
         Integer conv_id = sharedPreferences.getInt("Conversation ID PHOTO", 1);
-        switch(requestCode) {
+        switch (requestCode) {
             case 0:
-                if(resultCode == RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     editPhoto args = new editPhoto(conv_id, imageReturnedIntent.getDataString());
 
                     PhotoObservable.getInstance().sendData(args);
@@ -608,13 +620,13 @@ public class SetupRobot extends AppCompatActivity  {
 
                 break;
             case 1:
-                if(resultCode == RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     Uri selectedImage = imageReturnedIntent.getData();
                     photoId = photoId + 1;
                     PhotoConv photo = new PhotoConv(photoId, conversation_id, selectedImage);
                     photos.add(photo);
                     adptPhoto.notifyDataSetChanged();
-                    
+
                 }
                 break;
         }
@@ -640,26 +652,18 @@ public class SetupRobot extends AppCompatActivity  {
                 final ArrayList<SayConv> says = new ArrayList<SayConv>();
 
                 int maxVideoId = db.getVideosMaxID();
-                /*
-                // Create video and add to db
-                VideoConv video = new VideoConv(maxVideoId + 1, conversation_id, videoURL.getText().toString(), videoNAME.getText().toString(), videoDESC.getText().toString(), videoCAT.getText().toString());
 
-                if(false != videoURL.getText().toString().equals("")){
-                    db.addVideo(video);
-                }
-                */
                 Log.d("Convo_id", Integer.toString(conversation_id));
                 Log.d("Video URL", videoURL.getText().toString().replace("dl=0", "raw=1"));
-                if(false == videoNAME.getText().toString().equals("") && false == videoURL.getText().toString().equals("")) {
-                    Log.d("Video", videoNAME.getText().toString()) ;
-                    videos.add( new VideoConv(maxVideoId + 1, conversation_id, videoURL.getText().toString().replace("dl=0", "raw=1"), videoCAT.getText().toString(), videoDESC.getText().toString(), videoNAME.getText().toString()));
+                if (false == videoNAME.getText().toString().equals("") && false == videoURL.getText().toString().equals("")) {
+                    Log.d("Video", videoNAME.getText().toString());
+                    videos.add(new VideoConv(maxVideoId + 1, conversation_id, videoURL.getText().toString().replace("dl=0", "raw=1"), videoCAT.getText().toString(), videoDESC.getText().toString(), videoNAME.getText().toString()));
                     adptVideo.setNotifyOnChange(true);
                     videoView.setAdapter(adptVideo);
                 }
                 pwindo2.dismiss();
             }
         });
-
 
 
         videoxButton.setOnClickListener(new View.OnClickListener() {

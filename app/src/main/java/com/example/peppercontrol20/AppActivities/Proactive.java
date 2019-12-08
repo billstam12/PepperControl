@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
-import android.preference.PreferenceManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.aldebaran.qi.sdk.QiContext;
@@ -42,16 +42,17 @@ import java.util.Random;
 public class Proactive extends Activity implements RobotLifecycleCallbacks {
     SQLiteDatabaseHandler db;
     QiContext qiContext;
+    ArrayList<Conversation> proactiveConversations, conversations;
+    String chatBot = "topic: ~chatbot()\n";
     private ArrayList<ListenConv> listenConv;
     private ArrayList<SayConv> sayConv;
     private String activity;
     private int isProactive;
     private int event_id;
-    ArrayList<Conversation> proactiveConversations, conversations;
     private HumanAwareness humanAwareness;
-    String chatBot = "topic: ~chatbot()\n";
     private MediaPlayer mediaPlayerGuitar;
     private MediaPlayer mediaPlayerDisco;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -73,7 +74,7 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
     public void onRobotFocusGained(QiContext qiContext) {
         this.qiContext = qiContext;
         db = new SQLiteDatabaseHandler(qiContext);
-        proactiveConversations =  new ArrayList<Conversation>();
+        proactiveConversations = new ArrayList<Conversation>();
         conversations = (ArrayList<Conversation>) db.getAllConversations(event_id);
         Log.d("I m activity", "2");
         int i = 0;
@@ -91,7 +92,7 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
         Random r = new Random();
         int low = 0;
         int high = proactiveConversations.size();
-        int result = r.nextInt(high-low) + low;
+        int result = r.nextInt(high - low) + low;
         Conversation conversation = proactiveConversations.get(result);
         ArrayList<SayConv> says = conversation.getConversationSay();
         ArrayList<ListenConv> listens = conversation.getConversationListen();
@@ -106,7 +107,7 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
 
         ArrayList<Phrase> listenPhrases = new ArrayList<Phrase>();
 
-        for(i = 0; i < listens.size(); i++){
+        for (i = 0; i < listens.size(); i++) {
             Log.d("Phrase", listens.get(i).listen);
             listenPhrases.add(new Phrase(listens.get(i).listen));
         }
@@ -123,10 +124,10 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
             r = new Random();
             low = 0;
             high = says.size();
-            result = r.nextInt(high-low) + low;
+            result = r.nextInt(high - low) + low;
             PhraseSet matchedPhraseSet = listenResult.getMatchedPhraseSet();
 
-            if(PhraseSetUtil.equals(matchedPhraseSet, listenPhraseSet)){
+            if (PhraseSetUtil.equals(matchedPhraseSet, listenPhraseSet)) {
                 Phrase sayPhrase = new Phrase(says.get(result).say);
 
 
@@ -138,12 +139,9 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
                 //doAction(qiContext, conversation.getConversationActivity(), Integer.toString(conversation.getId()));
                 finish();
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             finish();
         }
-
-
 
 
     }
@@ -166,49 +164,26 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
         super.onDestroy();
     }
 
-    class MyQiChatExecutor extends BaseQiChatExecutor {
-        private final QiContext qiContext;
-        MyQiChatExecutor(QiContext context) {
-            super(context);
-            this.qiContext = context;
-        }
-
-        @Override
-        public void runWith(List<String> params) {
-            // This is called when execute is reached in the topic
-            doAction(qiContext, params.get(0), params.get(1));
-        }
-
-        @Override
-        public void stop() {
-            // This is called when chat is canceled or stopped
-        }
-
-    }
-
     public void doAction(QiContext qiContext, String action, String conversationID) {
         // Create an animation.
         Log.d("Action", action);
-        if (action.equals("Disco")){
+        if (action.equals("Disco")) {
             dance(qiContext);
-        }
-        else if(action.equals("Guitar")){
+        } else if (action.equals("Guitar")) {
             playGuitar(qiContext);
-        }
-        else if(action.equals("Video")){
+        } else if (action.equals("Video")) {
             playVideo(qiContext, Integer.parseInt(conversationID));
-        }
-        else if(action.equals("Photo")){
+        } else if (action.equals("Photo")) {
             playPhotos(qiContext, Integer.parseInt(conversationID));
         }
 
 
-
     }
-    public  void playVideo(QiContext qiContext, int conversationID){
-        Log.d("Window","Opening Window: " + Integer.toString(conversationID));
+
+    public void playVideo(QiContext qiContext, int conversationID) {
+        Log.d("Window", "Opening Window: " + Integer.toString(conversationID));
         ArrayList<VideoConv> videos = db.getVideos(conversationID);
-        if(videos.size() == 1){
+        if (videos.size() == 1) {
             VideoConv singleVideo = videos.get(0);
             Intent i = new Intent(qiContext, SingleMedia.class);
 
@@ -218,8 +193,7 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
             i.putExtra("Video Category", singleVideo.category);
             i.putExtra("Video URL", singleVideo.url);
             qiContext.startActivity(i);
-        }
-        else {
+        } else {
             Intent i = new Intent(qiContext, VideoPlayers.class);
             // sending data process
             i.putExtra("Video ID", conversationID);
@@ -229,24 +203,25 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
                 Log.d("ERROR", e.toString());
             }
         }
-        Log.d("Window","Closed Window");
+        Log.d("Window", "Closed Window");
 
     }
 
-    public  void playPhotos(QiContext qiContext, int conversationID){
-        Log.d("Window","Opening Window: " + Integer.toString(conversationID));
+    public void playPhotos(QiContext qiContext, int conversationID) {
+        Log.d("Window", "Opening Window: " + Integer.toString(conversationID));
         Intent i = new Intent(qiContext, PhotoPresentation.class);
         // sending data process
         i.putExtra("Photo ID", conversationID);
         try {
             qiContext.startActivity(i);
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.d("ERROR", e.toString());
         }
-        Log.d("Window","Closed Window");
+        Log.d("Window", "Closed Window");
 
     }
-    public void playGuitar(QiContext qiContext ) {
+
+    public void playGuitar(QiContext qiContext) {
 
 
         // Create an animation.
@@ -266,7 +241,7 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
 
     }
 
-    public void dance(QiContext qiContext){
+    public void dance(QiContext qiContext) {
         // Create an animation.
         Log.d("Dance", "Now I am Dancing");
         Animation animation = AnimationBuilder.with(qiContext) // Create the builder with the context.
@@ -282,6 +257,27 @@ public class Proactive extends Activity implements RobotLifecycleCallbacks {
         animate.addOnStartedListener(() -> mediaPlayerDisco.start());
 
         //animate.run();
+    }
+
+    class MyQiChatExecutor extends BaseQiChatExecutor {
+        private final QiContext qiContext;
+
+        MyQiChatExecutor(QiContext context) {
+            super(context);
+            this.qiContext = context;
+        }
+
+        @Override
+        public void runWith(List<String> params) {
+            // This is called when execute is reached in the topic
+            doAction(qiContext, params.get(0), params.get(1));
+        }
+
+        @Override
+        public void stop() {
+            // This is called when chat is canceled or stopped
+        }
+
     }
 
 

@@ -1,11 +1,9 @@
 package com.example.peppercontrol20.ConversationControl;
 
 
-import android.net.Uri;
-
 import java.util.ArrayList;
 
-public class Conversation{
+public class Conversation {
 
     int id;
     int event_id;
@@ -18,24 +16,8 @@ public class Conversation{
     Integer is_proactive;
 
 
-    public String getConversationProactiveEngagement() {
-        return proactive_engagement;
-    }
-
-    public void setConversationProactiveEngagement(String proactive_engagement) {
-        this.proactive_engagement = proactive_engagement;
-    }
-
     public Conversation() {
         super();
-    }
-
-    public Integer getConversationProactive() {
-        return is_proactive;
-    }
-
-    public void setConversationProactive(Integer is_proactive) {
-        this.is_proactive = is_proactive;
     }
 
     public Conversation(int i, int event_id, ArrayList<ListenConv> listen, ArrayList<SayConv> say, ArrayList<VideoConv> video, ArrayList<PhotoConv> photo, String activity) {
@@ -65,12 +47,28 @@ public class Conversation{
     }
 
     // constructor
-    public Conversation(ArrayList<ListenConv> listen, ArrayList<SayConv> say, ArrayList<VideoConv> video,  ArrayList<PhotoConv> photo,  String activity){
+    public Conversation(ArrayList<ListenConv> listen, ArrayList<SayConv> say, ArrayList<VideoConv> video, ArrayList<PhotoConv> photo, String activity) {
         this.listen = listen;
         this.say = say;
         this.activity = activity;
         this.video = video;
         this.photo = photo;
+    }
+
+    public String getConversationProactiveEngagement() {
+        return proactive_engagement;
+    }
+
+    public void setConversationProactiveEngagement(String proactive_engagement) {
+        this.proactive_engagement = proactive_engagement;
+    }
+
+    public Integer getConversationProactive() {
+        return is_proactive;
+    }
+
+    public void setConversationProactive(Integer is_proactive) {
+        this.is_proactive = is_proactive;
     }
 
     public int getConversationEventID() {
@@ -84,25 +82,43 @@ public class Conversation{
     public int getId() {
         return id;
     }
+
     public void setId(int id) {
         this.id = id;
     }
+
     public ArrayList<ListenConv> getConversationListen() {
         return listen;
     }
-    public ArrayList<SayConv> getConversationSay() {
-        return say;
-    }
-    public String getConversationActivity() { return activity; }
-    public ArrayList<PhotoConv> getConversationPhoto() { return  photo; }
+
     public void setConversationListen(ArrayList<ListenConv> listen) {
         this.listen = listen;
     }
+
+    public ArrayList<SayConv> getConversationSay() {
+        return say;
+    }
+
     public void setConversationSay(ArrayList<SayConv> say) {
         this.say = say;
     }
-    public void setConversationActivity(String activity) {this.activity = activity;}
-    public void setConversationPhoto(ArrayList<PhotoConv> photo) {this.photo = photo;}
+
+    public String getConversationActivity() {
+        return activity;
+    }
+
+    public void setConversationActivity(String activity) {
+        this.activity = activity;
+    }
+
+    public ArrayList<PhotoConv> getConversationPhoto() {
+        return photo;
+    }
+
+    public void setConversationPhoto(ArrayList<PhotoConv> photo) {
+        this.photo = photo;
+    }
+
     public ArrayList<VideoConv> getConversationVideo() {
         return video;
     }

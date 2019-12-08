@@ -21,6 +21,7 @@ public class SayConv {
     public int getId() {
         return id;
     }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -28,12 +29,15 @@ public class SayConv {
     public int getConvId() {
         return conv_id;
     }
+
     public void setConvId(int conv_id) {
         this.conv_id = conv_id;
     }
+
     public String getSay() {
         return say;
     }
+
     public void setSay(String say) {
         this.say = say;
     }

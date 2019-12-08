@@ -1,33 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="415dp"
     android:layout_height="fill_parent"
-    android:background="@color/colorPrimaryDark"
-    android:orientation="vertical"
     android:layout_gravity="center"
+    android:background="@color/colorPrimaryDark"
     android:fillViewport="true"
-    >
+    android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/popup_element"
         android:layout_width="415dp"
         android:layout_height="match_parent"
         android:background="@color/colorPrimaryDark"
-        android:padding="5dp"
-        android:id="@+id/popup_element"
         android:orientation="vertical"
-        >
+        android:padding="5dp">
 
         <Button
+            android:id="@+id/x-button"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_gravity="end"
+            android:background="@drawable/circlebackground"
             android:gravity="center"
             android:text="X"
             android:textColor="@color/white"
-            android:textStyle="bold"
-            android:id="@+id/x-button"
-            android:background="@drawable/circlebackground"/>
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -38,115 +35,88 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:textSize="10dp"
                 android:gravity="center"
+                android:text="Give below the event Details"
                 android:textColor="@color/white"
-                android:text="Give below the event Details"/>
+                android:textSize="10dp" />
 
 
         </LinearLayout>
+
         <LinearLayout
+            android:id="@id/editLayout"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_marginTop="25dp"
-            android:id="@id/editLayout">
+            android:orientation="vertical">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="5dp"
-                android:textColor="@color/white"
-                android:text="Event Name:"/>
+                android:text="Event Name:"
+                android:textColor="@color/white" />
+
             <EditText
+                android:id="@+id/editTextEvent"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:hint=""
-                android:textColorHint="@color/white"
-                android:textColor="@color/white"
                 android:layout_gravity="left"
-                android:id="@+id/editTextEvent"/>
+                android:hint=""
+                android:textColor="@color/white"
+                android:textColorHint="@color/white" />
 
 
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="25dp"
             android:id="@+id/photoLayout"
-            >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingBottom="5dp"
-                android:textColor="@color/white"
-                android:text="Add Wallpaper for this Event"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Add Photo"
-                android:textColor="@color/white"
-                android:layout_gravity="right"
-                android:background="@drawable/buttonshape"
-                android:id="@+id/addPhotoButton"/>
-
-
-            <ImageView
-                android:layout_width="200dp"
-                android:layout_height="150dp"
-                android:id="@+id/eventWallpaper"/>
-        </LinearLayout>
-
-
-        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_marginTop="25dp"
-            android:id="@+id/iconLayout"
-            >
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="5dp"
-                android:textColor="@color/white"
-                android:text="Add Icon for this Event"/>
+                android:text="Add Wallpaper for this Event"
+                android:textColor="@color/white" />
 
             <Button
+                android:id="@+id/addPhotoButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Add Icon"
-                android:textColor="@color/white"
                 android:layout_gravity="right"
                 android:background="@drawable/buttonshape"
-                android:id="@+id/addIconButton"/>
+                android:text="Add Photo"
+                android:textColor="@color/white" />
 
 
             <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:id="@+id/eventIcon"/>
+                android:id="@+id/eventWallpaper"
+                android:layout_width="200dp"
+                android:layout_height="150dp" />
         </LinearLayout>
+
+
+
         <TextView
+            android:id="@+id/notify"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="@color/colorAccent"
-            android:id="@+id/notify"
-            android:text=""/>
+            android:text=""
+            android:textColor="@color/colorAccent" />
+
         <Button
+            android:id="@+id/save_popup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SAVE"
-            android:layout_marginTop="15dp"
             android:layout_gravity="center_horizontal"
             android:background="@drawable/buttonshape"
-            android:id="@+id/save_popup"
-            android:textColor="@color/white"/>
+            android:text="SAVE"
+            android:textColor="@color/white" />
 
 
     </LinearLayout>

@@ -24,9 +24,9 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.example.peppercontrol20.AppActivities.AdminPanel;
 import com.example.peppercontrol20.AppActivities.EventPhotoObservable;
 import com.example.peppercontrol20.AppActivities.PepperActivity;
-import com.example.peppercontrol20.AppActivities.AdminPanel;
 import com.example.peppercontrol20.ConversationControl.Event;
 import com.example.peppercontrol20.ConversationControl.SQLiteDatabaseHandler;
 import com.example.peppercontrol20.Models.photoObject;
@@ -39,24 +39,29 @@ import java.util.Observable;
 import java.util.Observer;
 
 public class EventAdapter extends ArrayAdapter<Event> implements Observer {
+    static ArrayList<Event> events;
     Context mContext;
     Uri eventIconUri, eventWallpaperUri;
     ImageView eventIcon;
     ImageView eventWallpaper;
-    static ArrayList<Event> events;
     private RadioButton mSelectedRB;
     private int mSelectedPosition = -1;
 
 
+    public EventAdapter(Context context, int textViewResourceId, ArrayList<Event> items) {
+        super(context, textViewResourceId, items);
+        this.mContext = context;
+        EventPhotoObservable.getInstance().addObserver(this);
+    }
 
     @Override
     public void update(Observable o, Object args) {
-        if(o instanceof EventPhotoObservable){
+        if (o instanceof EventPhotoObservable) {
 
             photoObject p = (photoObject) args;
             Uri selectedImage = (((photoObject) args).getUri());
             int type = p.getType();
-            if(type == 0){
+            if (type == 0) {
                 eventWallpaperUri = selectedImage;
                 try {
                     Picasso.get()
@@ -65,13 +70,11 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                             .fit()
                             .centerCrop()
                             .into(eventWallpaper);
-                }
-                catch (Exception e){
+                } catch (Exception e) {
 
                 }
 
-            }
-            else if(type == 1){
+            } else if (type == 1) {
                 eventIconUri = selectedImage;
                 Log.d("Updated:", "event icon");
                 eventIcon.setImageURI(eventIconUri);
@@ -79,20 +82,6 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
 
         }
     }
-
-    private static class ViewHolder {
-        private TextView name;
-        private Button editButton;
-        private Button deleteButton;
-        private RadioButton radioButton;
-    }
-
-    public EventAdapter(Context context, int textViewResourceId, ArrayList<Event> items) {
-        super(context, textViewResourceId, items);
-        this.mContext = context;
-        EventPhotoObservable.getInstance().addObserver(this);
-    }
-
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -117,11 +106,11 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         // Get checked id
         //int check = sharedPreferences.getInt("Check", -1);
-        mSelectedPosition = sharedPreferences.getInt("Check", - 1) - 1;
+        mSelectedPosition = sharedPreferences.getInt("Check", -1) - 1;
         // Populate the data into the template view using the data object
         String endText = event.getName();
-        if(endText.length() > 20){
-            endText = endText.substring(0,20) + "...";
+        if (endText.length() > 20) {
+            endText = endText.substring(0, 20) + "...";
         }
         name.setText(endText);
         name.setOnClickListener(new View.OnClickListener() {
@@ -140,12 +129,10 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                 pwindo.setContentView(R.layout.edit_event);
                 pwindo.show();
                 Button addWallpaper = pwindo.findViewById(R.id.addPhotoButton);
-                Button addIcon = pwindo.findViewById(R.id.addIconButton);
                 Button closeButton = pwindo.findViewById(R.id.x_button);
                 EditText eventName = pwindo.findViewById(R.id.editTextEvent);
                 TextView notify = pwindo.findViewById(R.id.notify);
                 Button saveButton = pwindo.findViewById(R.id.save_popup);
-                eventIcon = pwindo.findViewById(R.id.eventIcon);
                 eventWallpaper = pwindo.findViewById(R.id.eventWallpaper);
                 eventWallpaperUri = null;
                 eventIconUri = null;
@@ -165,7 +152,7 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                     } else {
                         // No explanation needed; request the permission
                         ActivityCompat.requestPermissions((AdminPanel) mContext,
-                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
 
                         // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
                         // app-defined int constant. The callback method gets the
@@ -173,7 +160,7 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                     }
                 } else {
                     // Permission has already been granted
-                    if(event.getPhoto() != null){
+                    if (event.getPhoto() != null) {
                         eventWallpaper.setImageURI(event.getPhoto());
                         Picasso.get()
                                 .load(event.getPhoto())
@@ -193,15 +180,14 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                         if (nameString == "") {
                             notify.setText("Please enter a name for the event!");
                             notify.setVisibility(View.VISIBLE);
-                        }
-                        else{
+                        } else {
                             Log.d("Editing Event with id", Integer.toString(event.getId()));
 
-                            if(eventIconUri != null){
+                            if (eventIconUri != null) {
                                 event.setIcon(eventIconUri);
 
                             }
-                            if(eventWallpaperUri != null){
+                            if (eventWallpaperUri != null) {
                                 event.setPhoto(eventWallpaperUri);
                             }
                             //eventAdptr.notifyDataSetChanged();
@@ -222,18 +208,10 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                         Intent pickPhoto = new Intent(Intent.ACTION_PICK,
                                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
-                        ((Activity) mContext).startActivityForResult(pickPhoto , 2);//one can be replaced with any action code
+                        ((Activity) mContext).startActivityForResult(pickPhoto, 2);//one can be replaced with any action code
                     }
                 });
 
-                addIcon.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent pickPhoto = new Intent(Intent.ACTION_PICK,
-                                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                        ((Activity) mContext).startActivityForResult(pickPhoto , 3);//one can be replaced with any action code
-                    }
-                });
 
                 closeButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -255,7 +233,7 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                if(events.size() == 0){
+                                if (events.size() == 0) {
                                     editor.putInt("Check", -1).apply();
                                 }
                                 db.deleteEvent(event);
@@ -281,7 +259,7 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
         radioButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(position != mSelectedPosition && mSelectedRB != null){
+                if (position != mSelectedPosition && mSelectedRB != null) {
                     mSelectedRB.setChecked(false);
 
                 }
@@ -290,25 +268,31 @@ public class EventAdapter extends ArrayAdapter<Event> implements Observer {
                 Map<String, ?> allEntries = sharedPreferences.getAll();
                 for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
                     Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
-                }                 mSelectedPosition = position;
+                }
+                mSelectedPosition = position;
                 mSelectedRB = (RadioButton) v;
 
 
             }
         });
-        if(mSelectedPosition != position){
+        if (mSelectedPosition != position) {
             radioButton.setChecked(false);
-        }
-        else{
+        } else {
             radioButton.setChecked(true);
-            if(mSelectedRB != null && radioButton != mSelectedRB){
+            if (mSelectedRB != null && radioButton != mSelectedRB) {
                 mSelectedRB = radioButton;
             }
         }
 
 
-
         // Return the completed view to render on screen
         return convertView;
+    }
+
+    private static class ViewHolder {
+        private TextView name;
+        private Button editButton;
+        private Button deleteButton;
+        private RadioButton radioButton;
     }
 }

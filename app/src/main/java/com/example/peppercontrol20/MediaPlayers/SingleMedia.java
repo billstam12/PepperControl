@@ -21,20 +21,18 @@ public class SingleMedia extends AppCompatActivity {
 
         // Recieve data
 
-        String name  = getIntent().getExtras().getString("Video Name");
+        String name = getIntent().getExtras().getString("Video Name");
         String description = getIntent().getExtras().getString("Video Description");
         String category = getIntent().getExtras().getString("Video Category");
-        String thumbnail = getIntent().getExtras().getString("Video Thumbnail") ;
+        String thumbnail = getIntent().getExtras().getString("Video Thumbnail");
         String url = getIntent().getExtras().getString("Video URL");
-
-
 
 
         RequestOptions requestOptions = new RequestOptions().centerCrop().placeholder(R.drawable.loading).error(R.drawable.loading);
 
         // Set video
 
-        VideoView videoView = (VideoView)findViewById(R.id.aa_video_url);
+        VideoView videoView = (VideoView) findViewById(R.id.aa_video_url);
         mediaController.setAnchorView(videoView);
         videoView.setMediaController(mediaController);
         videoView.setVideoURI(Uri.parse(url));

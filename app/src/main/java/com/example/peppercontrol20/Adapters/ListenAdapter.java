@@ -1,11 +1,9 @@
 package com.example.peppercontrol20.Adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
@@ -15,10 +13,6 @@ import com.example.peppercontrol20.R;
 import java.util.ArrayList;
 
 public class ListenAdapter extends ArrayAdapter<ListenConv> {
-    private static class ViewHolder {
-        private TextView name;
-    }
-
     public ListenAdapter(Context context, int textViewResourceId, ArrayList<ListenConv> items) {
         super(context, textViewResourceId, items);
     }
@@ -36,14 +30,17 @@ public class ListenAdapter extends ArrayAdapter<ListenConv> {
         TextView name = (TextView) convertView.findViewById(R.id.textViewId);
         // Populate the data into the template view using the data object
         String endText = listen.listen;
-        if(endText.length() > 20){
-            endText = endText.substring(0,20) + "...";
+        if (endText.length() > 20) {
+            endText = endText.substring(0, 20) + "...";
         }
         name.setText(endText);
         // Return the completed view to render on screen
 
 
-
         return convertView;
+    }
+
+    private static class ViewHolder {
+        private TextView name;
     }
 }

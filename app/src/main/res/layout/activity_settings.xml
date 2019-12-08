@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
-    tools:context=".AppActivities.Settings"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".AppActivities.Settings">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="34dp"
-        android:minHeight="34dp"
         android:layout_weight="0.2"
-        android:padding="15dp"
-
         android:background="@color/colorPrimaryDark"
+        android:minHeight="34dp"
 
-        android:orientation="vertical">
+        android:orientation="vertical"
+
+        android:padding="15dp">
 
         <TextView
-            android:textStyle="bold"
-            android:textSize="24dp"
+            android:id="@+id/settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Settings"
             android:textColor="@color/white"
-            android:id="@+id/settings"
-            android:text="Settings" />
+            android:textSize="24dp"
+            android:textStyle="bold" />
 
         <RelativeLayout
             android:layout_width="850dp"

@@ -8,11 +8,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -31,34 +31,50 @@ import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 public class MainActivity extends AppCompatActivity {
 
-    static TextView status;
-    static Button btnConnect;
-    static ListView listView;
-    private Dialog dialog;
     public static final int MESSAGE_STATE_CHANGE = 1;
     public static final int MESSAGE_READ = 2;
     public static final int MESSAGE_WRITE = 3;
     public static final int MESSAGE_DEVICE_OBJECT = 4;
     public static final int MESSAGE_TOAST = 5;
     public static final String DEVICE_OBJECT = "Robot";
+    // Make sure to declare as ArrayList so it's Serializable
+    static final String STATE_USER = "user";
+    private static final int REQUEST_ENABLE_BLUETOOTH = 1;
+    private static final String STATE_ITEMS = "Chat";
+    static TextView status;
+    static Button btnConnect;
+    static ListView listView;
+    Handler handler;
+    private Dialog dialog;
     private BluetoothAdapter bluetoothAdapter;
     private TextView mTextViewAngleLeft;
     private TextView mTextViewStrengthLeft;
-
     private TextView mTextViewAngleRight;
     private TextView mTextViewStrengthRight;
     private TextView mTextViewCoordinateRight;
-    private static final int REQUEST_ENABLE_BLUETOOTH = 1;
     private ChatController chatController;
     private BluetoothDevice connectingDevice;
     private ArrayAdapter<String> discoveredDevicesAdapter;
-    private int mCounter;
-    private static final String STATE_ITEMS = "Chat";
+    private final BroadcastReceiver discoveryFinishReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
 
-    // Make sure to declare as ArrayList so it's Serializable
-    static final String STATE_USER = "user";
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
+                    discoveredDevicesAdapter.add(device.getName() + "\n" + device.getAddress());
+                }
+            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                if (discoveredDevicesAdapter.getCount() == 0) {
+                    discoveredDevicesAdapter.add(getString(R.string.none_found));
+                }
+            }
+        }
+    };
+    private int mCounter;
     private String mUser;
-    Handler handler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,8 +102,7 @@ public class MainActivity extends AppCompatActivity {
             // Restore value of members from saved state
             status.setText(savedInstanceState.getString("CONNECT"));
 
-        }
-        else {
+        } else {
             // Probably initialize members with default values for a new instance
 
         }
@@ -111,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                         joystickRight.getNormalizedY()));
             }
         });
-        handler = new Handler(Looper.getMainLooper()){
+        handler = new Handler(Looper.getMainLooper()) {
 
             @Override
             public void handleMessage(Message msg) {
@@ -168,7 +183,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
     }
 
     private void sendMessage(String message) {
@@ -182,10 +196,6 @@ public class MainActivity extends AppCompatActivity {
             chatController.write(send);
         }
     }
-
-
-
-
 
     private void showPrinterPickDialog() {
         dialog = new Dialog(this);
@@ -295,12 +305,11 @@ public class MainActivity extends AppCompatActivity {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BLUETOOTH);
         } else {
-            chatController =  ChatController.getInstance(handler);
+            chatController = ChatController.getInstance(handler);
         }
 
 
     }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -318,6 +327,7 @@ public class MainActivity extends AppCompatActivity {
         status.setText(savedInstanceState.getString("CONNECT"));
 
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -335,24 +345,6 @@ public class MainActivity extends AppCompatActivity {
             chatController.stop();
         }
     }
-
-    private final BroadcastReceiver discoveryFinishReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-                    discoveredDevicesAdapter.add(device.getName() + "\n" + device.getAddress());
-                }
-            } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                if (discoveredDevicesAdapter.getCount() == 0) {
-                    discoveredDevicesAdapter.add(getString(R.string.none_found));
-                }
-            }
-        }
-    };
 
     @Override
     public void onBackPressed() {

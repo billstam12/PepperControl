@@ -1,128 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="415dp"
     android:layout_height="fill_parent"
-    android:background="@color/colorPrimaryDark"
-    android:orientation="vertical"
     android:layout_gravity="center"
+    android:background="@color/colorPrimaryDark"
     android:fillViewport="true"
-    >
+    android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/popup_video"
         android:layout_width="415dp"
         android:layout_height="match_parent"
         android:background="@color/colorPrimaryDark"
-        android:padding="5dp"
-        android:id="@+id/popup_video"
         android:orientation="vertical"
-        >
+        android:padding="5dp">
 
         <Button
+            android:id="@+id/x-button-video"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_gravity="end"
+            android:background="@drawable/circlebackground"
             android:gravity="center"
             android:text="X"
             android:textColor="@color/white"
-            android:textStyle="bold"
-            android:id="@+id/x-button-video"
-            android:background="@drawable/circlebackground"/>
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:textSize="10dp"
                 android:gravity="center"
+                android:text="Give below the details of the video"
                 android:textColor="@color/white"
-                android:text="Give below the details of the video"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textSize="10dp"
-                android:gravity="left"
-                android:textColor="@color/white"
-                android:text="Enter URL"/>
-
-            <EditText
-                android:layout_width="250dp"
-                android:layout_height="45dp"
-                android:layout_gravity="left"
-                android:textColor="@color/white"
-                android:id="@+id/video_url"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textSize="10dp"
-                android:gravity="left"
-
-                android:textColor="@color/white"
-                android:text="Enter Name"/>
-            <EditText
-                android:layout_width="250dp"
-                android:layout_height="45dp"
-                android:textColor="@color/white"
-                android:layout_gravity="left"
-                android:id="@+id/video_name"/>
+                android:textSize="10dp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:textSize="10dp"
                 android:gravity="left"
+                android:text="Enter URL"
                 android:textColor="@color/white"
-                android:text="Enter Category"/>
+                android:textSize="10dp" />
 
             <EditText
+                android:id="@+id/video_url"
                 android:layout_width="250dp"
                 android:layout_height="45dp"
                 android:layout_gravity="left"
+                android:textColor="@color/white" />
 
-                android:textColor="@color/white"
-
-                android:id="@+id/video_cat"/>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:textSize="10dp"
                 android:gravity="left"
+                android:text="Enter Name"
+
                 android:textColor="@color/white"
-                android:text="Enter Description"/>
+                android:textSize="10dp" />
 
             <EditText
+                android:id="@+id/video_name"
                 android:layout_width="250dp"
                 android:layout_height="45dp"
                 android:layout_gravity="left"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="left"
+                android:text="Enter Category"
                 android:textColor="@color/white"
-                android:id="@+id/video_desc"/>
+                android:textSize="10dp" />
+
+            <EditText
+                android:id="@+id/video_cat"
+                android:layout_width="250dp"
+                android:layout_height="45dp"
+
+                android:layout_gravity="left"
+
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="left"
+                android:text="Enter Description"
+                android:textColor="@color/white"
+                android:textSize="10dp" />
+
+            <EditText
+                android:id="@+id/video_desc"
+                android:layout_width="250dp"
+                android:layout_height="45dp"
+                android:layout_gravity="left"
+                android:textColor="@color/white" />
 
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SAVE"
-            android:layout_marginTop="15dp"
-            android:layout_marginRight="15dp"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/buttonshape"
-            android:id="@+id/save_video_popup"
-            android:textColor="@color/white"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DELETE"
-            android:layout_marginTop="15dp"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/buttonshape"
-            android:id="@+id/delete_video_popup"
-            android:textColor="@color/white"/>
+
+            <Button
+                android:id="@+id/save_video_popup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp"
+                android:background="@drawable/buttonshape"
+                android:text="SAVE"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/delete_video_popup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/buttonshape"
+                android:text="DELETE"
+                android:textColor="@color/white" />
         </LinearLayout>
 
 

@@ -24,11 +24,11 @@ import java.util.ArrayList;
 
 public class PhotoPresentation extends FragmentActivity {
 
+    private static ArrayList<PhotoConv> photos;
     ImageFragmentPagerAdapter imageFragmentPagerAdapter;
     ViewPager viewPager;
     SQLiteDatabaseHandler db;
     Integer convo_id;
-    private static ArrayList<PhotoConv> photos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,16 @@ public class PhotoPresentation extends FragmentActivity {
     }
 
     public static class SwipeFragment extends Fragment {
+        static SwipeFragment newInstance(int position) {
+            SwipeFragment swipeFragment = new SwipeFragment();
+            Log.d("Position", Integer.toString(position));
+
+            Bundle bundle = new Bundle();
+            bundle.putInt("position", position);
+            swipeFragment.setArguments(bundle);
+            return swipeFragment;
+        }
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
@@ -83,16 +93,6 @@ public class PhotoPresentation extends FragmentActivity {
                     .centerCrop()
                     .into(imageView);
             return swipeView;
-        }
-
-        static SwipeFragment newInstance(int position) {
-            SwipeFragment swipeFragment = new SwipeFragment();
-            Log.d("Position", Integer.toString(position));
-
-            Bundle bundle = new Bundle();
-            bundle.putInt("position", position);
-            swipeFragment.setArguments(bundle);
-            return swipeFragment;
         }
     }
 }

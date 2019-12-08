@@ -1,40 +1,44 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="150dp">
+    android:layout_width="match_parent"
+    android:layout_height="150dp"
+    android:orientation="vertical">
+
     <ImageView
+        android:id="@+id/photosImage"
         android:layout_width="200px"
         android:layout_height="150px"
-        android:layout_centerVertical="true"
 
         android:layout_columnWeight="1"
-        android:longClickable="true"
-        android:id="@+id/photosImage"
-        />
-    <Button
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:id="@+id/upButton"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/photosImage"
-        android:layout_marginLeft="50dp"
-        android:background="@drawable/up"/>
+        android:longClickable="true" />
+
     <Button
+        android:id="@+id/upButton"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_marginLeft="20dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="50dp"
+        android:layout_toRightOf="@id/photosImage"
+        android:background="@drawable/up" />
+
+    <Button
+        android:id="@+id/downButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_centerVertical="true"
 
+        android:layout_marginLeft="20dp"
         android:layout_toRightOf="@id/upButton"
-        android:id="@+id/downButton"
-        android:background="@drawable/down"/>
+        android:background="@drawable/down" />
+
     <Button
+        android:id="@+id/trashButton"
         android:layout_width="40dp"
         android:layout_height="50dp"
-        android:layout_marginLeft="20dp"
         android:layout_centerVertical="true"
 
+        android:layout_marginLeft="20dp"
         android:layout_toRightOf="@id/downButton"
-        android:id="@+id/trashButton"
-        android:background="@drawable/trash"/>
+        android:background="@drawable/trash" />
 
 </RelativeLayout>

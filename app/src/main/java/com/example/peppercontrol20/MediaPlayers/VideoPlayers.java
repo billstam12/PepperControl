@@ -1,6 +1,5 @@
 package com.example.peppercontrol20.MediaPlayers;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,17 +14,15 @@ import com.example.peppercontrol20.ConversationControl.VideoConv;
 import com.example.peppercontrol20.R;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class VideoPlayers extends AppCompatActivity {
 
+    Integer URL_JSON;
+    SQLiteDatabaseHandler db; //Database
     private JsonArrayRequest ArrayRequest;
     private RequestQueue requestQueue;
     private ArrayList<VideoConv> lstVideos = new ArrayList<>();
     private RecyclerView myrv;
-
-    Integer URL_JSON;
-    SQLiteDatabaseHandler db; //Database
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +40,9 @@ public class VideoPlayers extends AppCompatActivity {
 
     }
 
-    public void setRvadapter (ArrayList<VideoConv> lst) {
+    public void setRvadapter(ArrayList<VideoConv> lst) {
 
-        RVAdapter myAdapter = new RVAdapter(this, lst) ;
+        RVAdapter myAdapter = new RVAdapter(this, lst);
         myrv.setLayoutManager(new LinearLayoutManager(this));
         myrv.setAdapter(myAdapter);
 
