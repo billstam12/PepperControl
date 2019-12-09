@@ -4,7 +4,7 @@
 1. Introduction
 2. Required Tools
 3. Code File Description
-    * Folders
+    3.1 App Activities (### 3.1 AppActivities)
         * Files
 4. Build and Compilation
 ## 1. Introduction
